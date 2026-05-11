@@ -26,7 +26,8 @@ class AddProductScreen extends StatelessWidget {
             onPressed: () {},
             child: Text(
               'Save Draft',
-              style: AppTextStyles.labelMedium.copyWith(color: AppColors.primary),
+              style:
+                  AppTextStyles.labelMedium.copyWith(color: AppColors.primary),
             ),
           ),
           const SizedBox(width: 8),
@@ -55,7 +56,8 @@ class AddProductScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border, width: 2, style: BorderStyle.solid),
+        border: Border.all(
+            color: AppColors.border, width: 2, style: BorderStyle.solid),
       ),
       child: Center(
         child: Column(
@@ -63,8 +65,12 @@ class AddProductScreen extends StatelessWidget {
           children: [
             const Icon(Icons.camera_alt, size: 32, color: AppColors.muted),
             const SizedBox(height: 8),
-            Text('Add Product Photos', style: AppTextStyles.labelLarge.copyWith(color: AppColors.muted)),
-            Text('Tap to upload (up to 8 photos)', style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted)),
+            Text('Add Product Photos',
+                style:
+                    AppTextStyles.labelLarge.copyWith(color: AppColors.muted)),
+            Text('Tap to upload (up to 8 photos)',
+                style:
+                    AppTextStyles.bodySmall.copyWith(color: AppColors.muted)),
           ],
         ),
       ),
@@ -89,11 +95,13 @@ class AddProductScreen extends StatelessWidget {
               children: [
                 Text(
                   'Add a product demo video',
-                  style: AppTextStyles.labelMedium.copyWith(color: AppColors.secondary),
+                  style: AppTextStyles.labelMedium
+                      .copyWith(color: AppColors.secondary),
                 ),
                 Text(
                   'Videos increase conversion by 3x! 🚀',
-                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted),
+                  style:
+                      AppTextStyles.bodySmall.copyWith(color: AppColors.muted),
                 ),
               ],
             ),
@@ -109,8 +117,14 @@ class AddProductScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildTextField('Product Name *', 'e.g. Silk Banarasi Saree — Royal Blue'),
-          _buildDropdownField('Category *', ['Fashion & Clothing', 'Organic & Natural', 'Food & Snacks', 'Jewellery']),
+          _buildTextField(
+              'Product Name *', 'e.g. Silk Banarasi Saree — Royal Blue'),
+          _buildDropdownField('Category *', [
+            'Fashion & Clothing',
+            'Organic & Natural',
+            'Food & Snacks',
+            'Jewellery'
+          ]),
           Row(
             children: [
               Expanded(child: _buildTextField('Price (₹) *', '1299')),
@@ -119,7 +133,8 @@ class AddProductScreen extends StatelessWidget {
             ],
           ),
           _buildTextField('Stock Quantity *', 'e.g. 50'),
-          _buildTextField('Description', 'Describe your product...', maxLines: 4),
+          _buildTextField('Description', 'Describe your product...',
+              maxLines: 4),
           _buildTextField('Tags (comma-separated)', 'saree, handloom, silk'),
         ],
       ),
@@ -136,7 +151,8 @@ class AddProductScreen extends StatelessWidget {
           maxLines: maxLines,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.muted),
+            hintStyle:
+                AppTextStyles.bodyMedium.copyWith(color: AppColors.muted),
             filled: true,
             fillColor: AppColors.background,
             border: OutlineInputBorder(
@@ -147,7 +163,8 @@ class AddProductScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: AppColors.border, width: 1.5),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           ),
         ),
         const SizedBox(height: 14),
@@ -221,7 +238,8 @@ class AddProductScreen extends StatelessWidget {
               value: value,
               onChanged: (_) {},
               activeColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4)),
             ),
           ),
           const SizedBox(width: 10),
@@ -234,7 +252,7 @@ class AddProductScreen extends StatelessWidget {
   Widget _buildBottomButtons(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.card,
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
@@ -246,9 +264,12 @@ class AddProductScreen extends StatelessWidget {
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: AppColors.border, width: 2),
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
               ),
-              child: Text('Preview', style: AppTextStyles.labelLarge.copyWith(color: AppColors.text)),
+              child: Text('Preview',
+                  style:
+                      AppTextStyles.labelLarge.copyWith(color: AppColors.text)),
             ),
           ),
           const SizedBox(width: 12),
@@ -263,7 +284,8 @@ class AddProductScreen extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
               ),
               child: const Text('Publish Product'),
             ),

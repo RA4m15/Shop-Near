@@ -10,7 +10,8 @@ class NotificationsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Notifications', style: AppTextStyles.h3.copyWith(fontSize: 18)),
+        title: Text('Notifications',
+            style: AppTextStyles.h3.copyWith(fontSize: 18)),
         centerTitle: false,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.text, size: 20),
@@ -26,7 +27,11 @@ class NotificationsScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Center(
-              child: Text('Mark All Read', style: AppTextStyles.labelSmall.copyWith(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.w800)),
+              child: Text('Mark All Read',
+                  style: AppTextStyles.labelSmall.copyWith(
+                      color: AppColors.primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800)),
             ),
           ),
         ],
@@ -56,7 +61,8 @@ class NotificationsScreen extends StatelessWidget {
           _buildNotif(
             context,
             icon: '💬',
-            title: 'Green Bazaar replied: "Yes, COD available for Indore area!"',
+            title:
+                'Green Bazaar replied: "Yes, COD available for Indore area!"',
             bold: '',
             tail: '',
             time: '2 hours ago',
@@ -76,7 +82,8 @@ class NotificationsScreen extends StatelessWidget {
           _buildNotif(
             context,
             icon: '🌟',
-            title: 'CraftHub MP posted new Madhubani art collection. Check it out!',
+            title:
+                'CraftHub MP posted new Madhubani art collection. Check it out!',
             bold: '',
             tail: '',
             time: 'Yesterday',
@@ -86,7 +93,8 @@ class NotificationsScreen extends StatelessWidget {
           _buildNotif(
             context,
             icon: '🎁',
-            title: 'You have 1,240 loyalty points! Redeem for discount on next order',
+            title:
+                'You have 1,240 loyalty points! Redeem for discount on next order',
             bold: '',
             tail: '',
             time: '2 days ago',
@@ -96,7 +104,8 @@ class NotificationsScreen extends StatelessWidget {
           _buildNotif(
             context,
             icon: '💰',
-            title: 'Flash sale alert! 40% off on Handloom Sarees. Ends in 2 hours!',
+            title:
+                'Flash sale alert! 40% off on Handloom Sarees. Ends in 2 hours!',
             bold: '',
             tail: '',
             time: '3 days ago',
@@ -123,7 +132,8 @@ class NotificationsScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: unread ? AppColors.primary.withOpacity(0.04) : Colors.transparent,
+          color:
+              unread ? AppColors.primary.withOpacity(0.04) : Colors.transparent,
           border: const Border(bottom: BorderSide(color: AppColors.border)),
         ),
         child: Row(
@@ -132,7 +142,7 @@ class NotificationsScreen extends StatelessWidget {
             Container(
               width: 44,
               height: 44,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.background,
                 shape: BoxShape.circle,
               ),
@@ -147,17 +157,30 @@ class NotificationsScreen extends StatelessWidget {
                   RichText(
                     text: TextSpan(
                       text: title,
-                      style: AppTextStyles.bodySmall.copyWith(color: AppColors.text, fontSize: 13, height: 1.5),
+                      style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.text, fontSize: 13, height: 1.5),
                       children: bold.isNotEmpty
                           ? [
-                              TextSpan(text: bold, style: AppTextStyles.labelSmall.copyWith(fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.text)),
-                              TextSpan(text: tail, style: AppTextStyles.bodySmall.copyWith(color: AppColors.text, fontSize: 13, height: 1.5)),
+                              TextSpan(
+                                  text: bold,
+                                  style: AppTextStyles.labelSmall.copyWith(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w900,
+                                      color: AppColors.text)),
+                              TextSpan(
+                                  text: tail,
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                      color: AppColors.text,
+                                      fontSize: 13,
+                                      height: 1.5)),
                             ]
                           : null,
                     ),
                   ),
                   const SizedBox(height: 5),
-                  Text(time, style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted, fontSize: 11)),
+                  Text(time,
+                      style: AppTextStyles.bodySmall
+                          .copyWith(color: AppColors.muted, fontSize: 11)),
                 ],
               ),
             ),
@@ -166,7 +189,8 @@ class NotificationsScreen extends StatelessWidget {
                 width: 8,
                 height: 8,
                 margin: const EdgeInsets.only(top: 4),
-                decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                decoration: const BoxDecoration(
+                    color: AppColors.primary, shape: BoxShape.circle),
               ),
           ],
         ),
