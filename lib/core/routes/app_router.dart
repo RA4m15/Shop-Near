@@ -1,0 +1,180 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../features/onboarding/presentation/onboarding_screen.dart';
+import '../../features/home/presentation/home_screen.dart';
+import '../../features/discover/presentation/discover_screen.dart';
+import '../../features/discover/presentation/category_results_screen.dart';
+import '../../features/live/presentation/live_session_screen.dart';
+import '../../features/product/presentation/product_detail_screen.dart';
+import '../../features/shop/presentation/shop_page_screen.dart';
+import '../../features/cart/presentation/cart_screen.dart';
+import '../../features/chat/presentation/chat_list_screen.dart';
+import '../../features/chat/presentation/chat_detail_screen.dart';
+import '../../features/profile/presentation/profile_screen.dart';
+import '../../features/notifications/presentation/notifications_screen.dart';
+import '../../features/order_tracking/presentation/order_tracking_screen.dart';
+import '../../features/settings/presentation/settings_screen.dart';
+
+import '../../features/seller/presentation/seller_dashboard_screen.dart';
+import '../../features/seller/presentation/seller_products_screen.dart';
+import '../../features/seller/presentation/seller_orders_screen.dart';
+import '../../features/seller/presentation/seller_analytics_screen.dart';
+import '../../features/seller/presentation/add_product_screen.dart';
+import '../../features/seller/presentation/go_live_setup_screen.dart';
+import '../../features/reels/presentation/post_reel_screen.dart';
+import '../../features/reels/presentation/reels_screen.dart';
+
+import '../../shared/widgets/app_bottom_nav.dart';
+import '../../shared/widgets/seller_bottom_nav.dart';
+
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> _buyerShellNavigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> _sellerShellNavigatorKey = GlobalKey<NavigatorState>();
+
+class AppRouter {
+  static final router = GoRouter(
+    navigatorKey: _rootNavigatorKey,
+    initialLocation: '/',
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) => const OnboardingScreen(),
+      ),
+      // Live session is full screen, so outside the shell
+      GoRoute(
+        path: '/home/live',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const LiveSessionScreen(),
+      ),
+      GoRoute(
+        path: '/home/product/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ProductDetailScreen(),
+      ),
+      GoRoute(
+        path: '/home/shop/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ShopPageScreen(),
+      ),
+      GoRoute(
+        path: '/home/cart',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const CartScreen(),
+      ),
+      GoRoute(
+        path: '/home/notifications',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: '/home/order-track',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const OrderTrackingScreen(),
+      ),
+      GoRoute(
+        path: '/home/profile/orders/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const OrderTrackingScreen(),
+      ),
+      GoRoute(
+        path: '/home/settings',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/home/discover/:category',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => CategoryResultsScreen(
+          category: state.pathParameters['category'] ?? 'Category',
+        ),
+      ),
+      GoRoute(
+        path: '/home/chat/:name',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => ChatDetailScreen(
+          name: state.pathParameters['name'] ?? 'Chat',
+        ),
+      ),
+      
+      // Buyer Shell Route
+      ShellRoute(
+        navigatorKey: _buyerShellNavigatorKey,
+        builder: (context, state, child) {
+          return Scaffold(
+            body: child,
+            bottomNavigationBar: AppBottomNav(currentRoute: state.uri.path),
+          );
+        },
+        routes: [
+          GoRoute(
+            path: '/home',
+            builder: (context, state) => const HomeScreen(),
+          ),
+          GoRoute(
+            path: '/home/videos',
+            builder: (context, state) => const ReelsScreen(),
+          ),
+          GoRoute(
+            path: '/home/discover',
+            builder: (context, state) => const DiscoverScreen(),
+          ),
+          GoRoute(
+            path: '/home/chat',
+            builder: (context, state) => const ChatListScreen(),
+          ),
+          GoRoute(
+            path: '/home/profile',
+            builder: (context, state) => const ProfileScreen(),
+          ),
+        ],
+      ),
+
+      // Seller Shell Route
+      ShellRoute(
+        navigatorKey: _sellerShellNavigatorKey,
+        builder: (context, state, child) {
+          return Scaffold(
+            body: child,
+            bottomNavigationBar: SellerBottomNav(currentRoute: state.uri.path),
+          );
+        },
+        routes: [
+          GoRoute(
+            path: '/seller',
+            builder: (context, state) => const SellerDashboardScreen(),
+          ),
+          GoRoute(
+            path: '/seller/products',
+            builder: (context, state) => const SellerProductsScreen(),
+          ),
+          GoRoute(
+            path: '/seller/orders',
+            builder: (context, state) => const SellerOrdersScreen(),
+          ),
+          GoRoute(
+            path: '/seller/analytics',
+            builder: (context, state) => const SellerAnalyticsScreen(),
+          ),
+        ],
+      ),
+      
+      // Seller full screen routes
+      GoRoute(
+        path: '/seller/products/add',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const AddProductScreen(),
+      ),
+      GoRoute(
+        path: '/seller/golive',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const GoLiveSetupScreen(),
+      ),
+      GoRoute(
+        path: '/seller/post-reel',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const PostReelScreen(),
+      ),
+    ],
+  );
+}
