@@ -10,12 +10,10 @@ class AppTheme {
         primary: AppColors.primary,
         secondary: AppColors.secondary,
         error: AppColors.danger,
-        background: AppColors.background,
         surface: AppColors.card,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: AppColors.text,
-        onBackground: AppColors.text,
       ),
       scaffoldBackgroundColor: AppColors.background,
       textTheme: TextTheme(
@@ -46,7 +44,8 @@ class AppTheme {
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           textStyle: AppTextStyles.labelLarge,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           padding: const EdgeInsets.symmetric(vertical: 16),
         ),
       ),
@@ -68,12 +67,10 @@ class AppTheme {
         primary: AppColors.primary,
         secondary: AppColors.secondary,
         error: AppColors.danger,
-        background: AppColors.darkBackground,
         surface: AppColors.darkCard,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: AppColors.darkText,
-        onBackground: AppColors.darkText,
       ),
       scaffoldBackgroundColor: AppColors.darkBackground,
       textTheme: TextTheme(
@@ -82,11 +79,15 @@ class AppTheme {
         displaySmall: AppTextStyles.h3.copyWith(color: AppColors.darkText),
         headlineMedium: AppTextStyles.h4.copyWith(color: AppColors.darkText),
         bodyLarge: AppTextStyles.bodyLarge.copyWith(color: AppColors.darkText),
-        bodyMedium: AppTextStyles.bodyMedium.copyWith(color: AppColors.darkText),
+        bodyMedium:
+            AppTextStyles.bodyMedium.copyWith(color: AppColors.darkText),
         bodySmall: AppTextStyles.bodySmall.copyWith(color: AppColors.darkMuted),
-        labelLarge: AppTextStyles.labelLarge.copyWith(color: AppColors.darkText),
-        labelMedium: AppTextStyles.labelMedium.copyWith(color: AppColors.darkText),
-        labelSmall: AppTextStyles.labelSmall.copyWith(color: AppColors.darkMuted),
+        labelLarge:
+            AppTextStyles.labelLarge.copyWith(color: AppColors.darkText),
+        labelMedium:
+            AppTextStyles.labelMedium.copyWith(color: AppColors.darkText),
+        labelSmall:
+            AppTextStyles.labelSmall.copyWith(color: AppColors.darkMuted),
       ).apply(
         bodyColor: AppColors.darkText,
         displayColor: AppColors.darkText,
@@ -104,7 +105,8 @@ class AppTheme {
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           textStyle: AppTextStyles.labelLarge,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           padding: const EdgeInsets.symmetric(vertical: 16),
         ),
       ),

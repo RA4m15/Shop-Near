@@ -42,14 +42,16 @@ class ToggleSettingTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(label, style: AppTextStyles.labelMedium),
-                  Text(subtitle, style: AppTextStyles.labelSmall.copyWith(color: AppColors.muted)),
+                  Text(subtitle,
+                      style: AppTextStyles.labelSmall
+                          .copyWith(color: AppColors.muted)),
                 ],
               ),
             ),
             Switch(
               value: value,
               onChanged: onChanged,
-              activeColor: Colors.white,
+              activeThumbColor: Colors.white,
               activeTrackColor: AppColors.success,
               inactiveThumbColor: Colors.white,
               inactiveTrackColor: AppColors.border,
