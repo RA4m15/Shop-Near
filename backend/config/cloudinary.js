@@ -13,9 +13,8 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'shop-near',
-    resource_type: 'auto', // This allows both images and videos
-    allowed_formats: ['jpg', 'png', 'mp4', 'mov']
-  }
+    allowed_formats: ['jpg', 'jpeg', 'png'],
+  },
 });
 
 const upload = multer({ storage: storage });

@@ -25,6 +25,10 @@ router.post('/', auth, upload.single('video'), async (req, res) => {
       caption: req.body.caption
     });
     await reel.save();
+    
+    // Emit real-time update
+    req.io.emit('reel_update', { action: 'created', reel: reel });
+    
     res.status(201).json(reel);
   } catch (err) {
     res.status(500).json({ error: err.message });

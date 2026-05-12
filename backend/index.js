@@ -78,6 +78,17 @@ app.get('/', (req, res) => {
   res.send('Shop-Near Backend API is running...');
 });
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('🔥 Global Error Handler:', err);
+  res.status(500).json({
+    message: err.message || 'An internal server error occurred',
+    error: err.name || 'Error',
+    details: err.errors || err,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  });
+});
+
 // Start Server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
