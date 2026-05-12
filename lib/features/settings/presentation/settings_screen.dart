@@ -6,6 +6,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../shared/providers/user_providers.dart';
 import '../../../shared/providers/repository_providers.dart';
 import '../../../data/repositories/auth_repository.dart';
+import '../../profile/data/profile_provider.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -120,7 +121,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 // ── ACCOUNT ──
                 _buildSection('ACCOUNT', [
                   _buildSettingsItem(Icons.person, const Color(0xFFFFF0F3), AppColors.primary, 'Edit Profile', 'Name, photo, bio, location', () {
-                    context.push('/home/profile/edit');
+                    _showEditProfileDialog(user.name, user.handle ?? '', user.bio ?? '', user.location ?? '');
                   }),
                   _buildSettingsItem(Icons.phone, const Color(0xFFEFF6FF), AppColors.secondary, 'Phone & Email', '${user.phone ?? 'Not set'} · ${user.email}', () {
                     _showPhoneEmailDialog(user.phone ?? '', user.email);
@@ -220,6 +221,115 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         );
       }
     }
+  }
+
+  void _showEditProfileDialog(String name, String handle, String bio, String location) {
+    final nameController = TextEditingController(text: name);
+    final handleController = TextEditingController(text: handle);
+    final bioController = TextEditingController(text: bio);
+    final locationController = TextEditingController(text: location);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            Container(
+              width: 36, height: 36,
+              decoration: BoxDecoration(color: const Color(0xFFFFF0F3), borderRadius: BorderRadius.circular(10)),
+              alignment: Alignment.center,
+              child: const Icon(Icons.person, color: AppColors.primary, size: 18),
+            ),
+            const SizedBox(width: 10),
+            const Text('Edit Profile'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Full Name',
+                  prefixIcon: Icon(Icons.person_outline),
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: handleController,
+                decoration: const InputDecoration(
+                  labelText: 'Username',
+                  prefixIcon: Icon(Icons.alternate_email),
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: locationController,
+                decoration: const InputDecoration(
+                  labelText: 'Location',
+                  prefixIcon: Icon(Icons.location_on_outlined),
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: bioController,
+                maxLines: 3,
+                maxLength: 150,
+                decoration: const InputDecoration(
+                  labelText: 'Bio',
+                  prefixIcon: Icon(Icons.edit_note),
+                  border: OutlineInputBorder(),
+                  alignLabelWithHint: true,
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              try {
+                // Update local profile provider
+                ref.read(profileProvider.notifier).updateProfile(
+                  name: nameController.text.trim(),
+                  username: handleController.text.trim(),
+                  bio: bioController.text.trim(),
+                  location: locationController.text.trim(),
+                );
+                // Update backend
+                final repository = ref.read(userRepositoryProvider);
+                await repository.updateProfile({
+                  'name': nameController.text.trim(),
+                  'handle': handleController.text.trim(),
+                  'bio': bioController.text.trim(),
+                  'location': locationController.text.trim(),
+                });
+                ref.invalidate(userProfileProvider);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Profile updated successfully! ✨')),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Saved locally. API sync failed: ${e.toString()}')),
+                  );
+                }
+              }
+            },
+            child: const Text('Save', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showPhoneEmailDialog(String phone, String email) {

@@ -13,14 +13,15 @@ class SellerOrdersScreen extends ConsumerStatefulWidget {
   ConsumerState<SellerOrdersScreen> createState() => _SellerOrdersScreenState();
 }
 
-class _SellerOrdersScreenState extends ConsumerState<SellerOrdersScreen> with SingleTickerProviderStateMixin {
+class _SellerOrdersScreenState extends ConsumerState<SellerOrdersScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
-    
+
     // Connect socket and listen for orders
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final socketService = ref.read(socketServiceProvider);
@@ -53,7 +54,9 @@ class _SellerOrdersScreenState extends ConsumerState<SellerOrdersScreen> with Si
       appBar: AppBar(
         title: Text('Orders', style: AppTextStyles.h3),
         actions: [
-          IconButton(onPressed: () => ref.invalidate(sellerOrdersProvider), icon: const Icon(Icons.refresh)),
+          IconButton(
+              onPressed: () => ref.invalidate(sellerOrdersProvider),
+              icon: const Icon(Icons.refresh)),
         ],
         bottom: TabBar(
           controller: _tabController,
@@ -77,10 +80,14 @@ class _SellerOrdersScreenState extends ConsumerState<SellerOrdersScreen> with Si
           controller: _tabController,
           children: [
             _buildOrderList(orders),
-            _buildOrderList(orders.where((o) => o.status == 'Pending').toList()),
-            _buildOrderList(orders.where((o) => o.status == 'Packing').toList()),
-            _buildOrderList(orders.where((o) => o.status == 'Delivered').toList()),
-            _buildOrderList(orders.where((o) => o.status == 'Cancelled').toList()),
+            _buildOrderList(
+                orders.where((o) => o.status == 'Pending').toList()),
+            _buildOrderList(
+                orders.where((o) => o.status == 'Packing').toList()),
+            _buildOrderList(
+                orders.where((o) => o.status == 'Delivered').toList()),
+            _buildOrderList(
+                orders.where((o) => o.status == 'Cancelled').toList()),
           ],
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -100,7 +107,7 @@ class _SellerOrdersScreenState extends ConsumerState<SellerOrdersScreen> with Si
         final order = orders[index];
         Color statusBg;
         Color statusText;
-        
+
         switch (order.status) {
           case 'Pending':
             statusBg = const Color(0xFFFEF3C7);
@@ -129,7 +136,7 @@ class _SellerOrdersScreenState extends ConsumerState<SellerOrdersScreen> with Si
           order.productName,
           '#${order.id.substring(order.id.length - 4)}',
           '${order.buyerName} · ₹${order.amount.toInt()} · ${order.paymentMethod}',
-          '${order.status}',
+          order.status,
           statusBg,
           statusText,
           showAccept: order.status == 'Pending',
@@ -138,7 +145,9 @@ class _SellerOrdersScreenState extends ConsumerState<SellerOrdersScreen> with Si
     );
   }
 
-  Widget _buildOrderCard(String id, String icon, String name, String orderId, String buyerDetails, String status, Color statusBg, Color statusText, {bool showAccept = false}) {
+  Widget _buildOrderCard(String id, String icon, String name, String orderId,
+      String buyerDetails, String status, Color statusBg, Color statusText,
+      {bool showAccept = false}) {
     return GestureDetector(
       onTap: () {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -174,9 +183,13 @@ class _SellerOrdersScreenState extends ConsumerState<SellerOrdersScreen> with Si
                   RichText(
                     text: TextSpan(
                       text: '$name ',
-                      style: AppTextStyles.labelLarge.copyWith(color: AppColors.text),
+                      style: AppTextStyles.labelLarge
+                          .copyWith(color: AppColors.text),
                       children: [
-                        TextSpan(text: orderId, style: AppTextStyles.labelSmall.copyWith(color: AppColors.muted, fontSize: 10)),
+                        TextSpan(
+                            text: orderId,
+                            style: AppTextStyles.labelSmall.copyWith(
+                                color: AppColors.muted, fontSize: 10)),
                       ],
                     ),
                   ),
@@ -188,14 +201,18 @@ class _SellerOrdersScreenState extends ConsumerState<SellerOrdersScreen> with Si
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: statusBg,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     status,
-                    style: AppTextStyles.labelSmall.copyWith(color: statusText, fontWeight: FontWeight.w800, fontSize: 11),
+                    style: AppTextStyles.labelSmall.copyWith(
+                        color: statusText,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 11),
                   ),
                 ),
                 if (showAccept)
@@ -209,27 +226,36 @@ class _SellerOrdersScreenState extends ConsumerState<SellerOrdersScreen> with Si
                           ref.invalidate(sellerOrdersProvider);
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Order $orderId accepted! 📦'), backgroundColor: AppColors.success),
+                              SnackBar(
+                                  content: Text('Order $orderId accepted! 📦'),
+                                  backgroundColor: AppColors.success),
                             );
                           }
                         } catch (e) {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Failed to update status: $e'), backgroundColor: AppColors.primary),
+                              SnackBar(
+                                  content: Text('Failed to update status: $e'),
+                                  backgroundColor: AppColors.primary),
                             );
                           }
                         }
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: AppColors.secondary.withOpacity(0.1),
-                          border: Border.all(color: AppColors.secondary, width: 1.5),
+                          border: Border.all(
+                              color: AppColors.secondary, width: 1.5),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           'Accept',
-                          style: AppTextStyles.labelSmall.copyWith(color: AppColors.secondary, fontWeight: FontWeight.w800, fontSize: 10),
+                          style: AppTextStyles.labelSmall.copyWith(
+                              color: AppColors.secondary,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 10),
                         ),
                       ),
                     ),

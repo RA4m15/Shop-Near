@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../shared/providers/repository_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../providers/auth_providers.dart';
 import '../providers/auth_notifier.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -43,7 +41,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (authState.status == AuthStatus.error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(authState.errorMessage ?? 'Registration failed')),
+          SnackBar(
+              content: Text(authState.errorMessage ?? 'Registration failed')),
         );
       }
     } else if (authState.status == AuthStatus.authenticated) {
@@ -85,12 +84,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 const SizedBox(height: 20),
                 Text(
                   'Create Account',
-                  style: AppTextStyles.h1.copyWith(color: Colors.white, fontSize: 32),
+                  style: AppTextStyles.h1
+                      .copyWith(color: Colors.white, fontSize: 32),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Join ShopNear and support local businesses',
-                  style: AppTextStyles.bodyMedium.copyWith(color: Colors.white60),
+                  style:
+                      AppTextStyles.bodyMedium.copyWith(color: Colors.white60),
                 ),
                 const SizedBox(height: 40),
                 _buildTextField(
@@ -114,7 +115,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 const SizedBox(height: 24),
                 Text(
                   'I am a:',
-                  style: AppTextStyles.labelMedium.copyWith(color: Colors.white70),
+                  style:
+                      AppTextStyles.labelMedium.copyWith(color: Colors.white70),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -132,7 +134,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     onPressed: isLoading ? null : _register,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
                     ),
                     child: isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
@@ -154,9 +157,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.white.withOpacity(0.05),
+          color:
+              isSelected ? AppColors.primary : Colors.white.withOpacity(0.05),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? AppColors.primary : Colors.white.withOpacity(0.1)),
+          border: Border.all(
+              color: isSelected
+                  ? AppColors.primary
+                  : Colors.white.withOpacity(0.1)),
         ),
         child: Text(
           label,
