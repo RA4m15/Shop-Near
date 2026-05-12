@@ -21,7 +21,7 @@ class SocketService {
     _socket = IO.io(
       ApiEndpoints.baseUrl.replaceFirst('/api', ''), 
       IO.OptionBuilder()
-        .setTransports(['websocket'])
+        .setTransports(['websocket', 'polling'])
         .disableAutoConnect()
         .setAuth({'token': token}) // Server-side expects 'token' in auth handshake
         .build()

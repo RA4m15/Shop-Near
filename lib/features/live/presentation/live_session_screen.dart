@@ -78,6 +78,9 @@ class _LiveSessionScreenState extends ConsumerState<LiveSessionScreen> with Tick
         onTokenPrivilegeWillExpire: (RtcConnection connection, String token) {
           debugPrint('[onTokenPrivilegeWillExpire] connection: ${connection.toJson()}, token: $token');
         },
+        onConnectionStateChanged: (RtcConnection connection, ConnectionStateType state, ConnectionChangedReasonType reason) {
+          debugPrint('Agora Connection State: $state, Reason: $reason');
+        },
       ),
     );
 
