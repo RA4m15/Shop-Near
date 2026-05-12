@@ -84,9 +84,62 @@ class _LiveSessionScreenState extends ConsumerState<LiveSessionScreen> with Tick
       options: const ChannelMediaOptions(),
     );
     setState(() => _isJoined = true);
+
+    // Socket Interactions
+    _setupSocket();
+  }
+
+  void _setupSocket() {
+    final socketService = ref.read(socketServiceProvider);
+    final roomId = widget.session?.id ?? 'demo_channel';
+
+    socketService.emit('join_room', roomId);
+
+    socketService.on('receive_live_chat', (data) {
+      if (mounted) {
+        setState(() {
+          _chatMessages.add({
+            'user': data['user'],
+            'msg': data['msg'],
+            'isSeller': data['isSeller'] ?? false,
+          });
+        });
+        _scrollToBottom();
+      }
+    });
+
+    socketService.on('receive_live_reaction', (data) {
+      if (mounted && data['user'] != 'You') {
+        _showHeartAnimation(data['emoji']);
+      }
+    });
+  }
+
+  void _scrollToBottom() {
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   void _addHeart(String emoji) {
+    _showHeartAnimation(emoji);
+    
+    // Broadcast reaction
+    final socketService = ref.read(socketServiceProvider);
+    socketService.emit('live_reaction', {
+      'roomId': widget.session?.id ?? 'demo_channel',
+      'user': 'Someone',
+      'emoji': emoji,
+    });
+  }
+
+  void _showHeartAnimation(String emoji) {
     setState(() {
       _floatingHearts.add(
         _FloatingHeart(
@@ -104,23 +157,29 @@ class _LiveSessionScreenState extends ConsumerState<LiveSessionScreen> with Tick
 
   void _sendChatMessage() {
     if (_chatController.text.trim().isEmpty) return;
+    
+    final user = ref.read(authControllerProvider).user;
+    final msg = _chatController.text.trim();
+    final isSeller = user?.role == 'seller';
+
+    // Broadcast message
+    final socketService = ref.read(socketServiceProvider);
+    socketService.emit('live_chat', {
+      'roomId': widget.session?.id ?? 'demo_channel',
+      'user': user?.name ?? 'User',
+      'msg': msg,
+      'isSeller': isSeller,
+    });
+
     setState(() {
       _chatMessages.add({
         'user': 'You',
-        'msg': _chatController.text.trim(),
+        'msg': msg,
+        'isSeller': isSeller,
       });
       _chatController.clear();
     });
-    // Auto scroll
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    });
+    _scrollToBottom();
   }
 
   @override
