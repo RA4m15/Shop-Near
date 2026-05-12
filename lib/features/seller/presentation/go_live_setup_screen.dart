@@ -24,7 +24,9 @@ class GoLiveSetupScreen extends StatelessWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Text('Setup', style: AppTextStyles.labelMedium.copyWith(color: AppColors.muted)),
+            child: Text('Setup',
+                style:
+                    AppTextStyles.labelMedium.copyWith(color: AppColors.muted)),
           ),
         ],
       ),
@@ -67,7 +69,8 @@ class GoLiveSetupScreen extends StatelessWidget {
                 height: 90,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white.withOpacity(0.3), width: 3),
+                  border: Border.all(
+                      color: Colors.white.withOpacity(0.3), width: 3),
                 ),
                 alignment: Alignment.center,
                 child: const Text('😊', style: TextStyle(fontSize: 40)),
@@ -75,7 +78,8 @@ class GoLiveSetupScreen extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 'Camera preview',
-                style: AppTextStyles.labelMedium.copyWith(color: Colors.white.withOpacity(0.5)),
+                style: AppTextStyles.labelMedium
+                    .copyWith(color: Colors.white.withOpacity(0.5)),
               ),
             ],
           ),
@@ -126,11 +130,13 @@ class GoLiveSetupScreen extends StatelessWidget {
               fillColor: AppColors.background,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.border, width: 1.5),
+                borderSide:
+                    const BorderSide(color: AppColors.border, width: 1.5),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.border, width: 1.5),
+                borderSide:
+                    const BorderSide(color: AppColors.border, width: 1.5),
               ),
             ),
           ),
@@ -148,7 +154,11 @@ class GoLiveSetupScreen extends StatelessWidget {
               child: DropdownButton<String>(
                 isExpanded: true,
                 value: 'Fashion & Clothing 👗',
-                items: ['Fashion & Clothing 👗', 'Organic & Natural 🌿', 'Food & Snacks 🍕'].map((String item) {
+                items: [
+                  'Fashion & Clothing 👗',
+                  'Organic & Natural 🌿',
+                  'Food & Snacks 🍕'
+                ].map((String item) {
                   return DropdownMenuItem<String>(
                     value: item,
                     child: Text(item, style: AppTextStyles.bodyMedium),
@@ -169,7 +179,8 @@ class GoLiveSetupScreen extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text('Pin Products to Live Session', style: AppTextStyles.labelLarge),
+          child: Text('Pin Products to Live Session',
+              style: AppTextStyles.labelLarge),
         ),
         const SizedBox(height: 10),
         SizedBox(
@@ -190,20 +201,26 @@ class GoLiveSetupScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPinnedProduct(String icon, String name, String price, bool isPinned) {
+  Widget _buildPinnedProduct(
+      String icon, String name, String price, bool isPinned) {
     return Container(
       width: 90,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: isPinned ? AppColors.primary : AppColors.border, width: 2),
+        border: Border.all(
+            color: isPinned ? AppColors.primary : AppColors.border, width: 2),
       ),
       child: Column(
         children: [
           Text(icon, style: const TextStyle(fontSize: 24)),
-          Text(name, style: AppTextStyles.labelSmall.copyWith(fontSize: 9), overflow: TextOverflow.ellipsis),
-          Text(price, style: AppTextStyles.labelSmall.copyWith(color: AppColors.primary, fontWeight: FontWeight.w900)),
+          Text(name,
+              style: AppTextStyles.labelSmall.copyWith(fontSize: 9),
+              overflow: TextOverflow.ellipsis),
+          Text(price,
+              style: AppTextStyles.labelSmall.copyWith(
+                  color: AppColors.primary, fontWeight: FontWeight.w900)),
         ],
       ),
     );
@@ -220,9 +237,11 @@ class GoLiveSetupScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.add_circle_outline, color: AppColors.muted, size: 22),
+          const Icon(Icons.add_circle_outline,
+              color: AppColors.muted, size: 22),
           const SizedBox(height: 4),
-          Text('Add More', style: AppTextStyles.labelSmall.copyWith(color: AppColors.muted)),
+          Text('Add More',
+              style: AppTextStyles.labelSmall.copyWith(color: AppColors.muted)),
         ],
       ),
     );
@@ -243,7 +262,8 @@ class GoLiveSetupScreen extends StatelessWidget {
           Text('Live Settings', style: AppTextStyles.labelLarge),
           const SizedBox(height: 12),
           _buildToggleTile('Enable Chat', 'Viewers can send messages', true),
-          _buildToggleTile('Show Product Prices', 'Visible during session', true),
+          _buildToggleTile(
+              'Show Product Prices', 'Visible during session', true),
           _buildToggleTile('Record Session', 'Save for later viewing', false),
         ],
       ),
@@ -259,14 +279,17 @@ class GoLiveSetupScreen extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: AppTextStyles.labelLarge.copyWith(fontSize: 13)),
-              Text(sub, style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted)),
+              Text(title,
+                  style: AppTextStyles.labelLarge.copyWith(fontSize: 13)),
+              Text(sub,
+                  style:
+                      AppTextStyles.bodySmall.copyWith(color: AppColors.muted)),
             ],
           ),
           Switch(
             value: value,
             onChanged: (_) {},
-            activeColor: AppColors.success,
+            activeThumbColor: AppColors.success,
           ),
         ],
       ),
@@ -285,11 +308,14 @@ class GoLiveSetupScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('💡 Tips for a Successful Live', style: AppTextStyles.labelLarge.copyWith(color: const Color(0xFF92400E))),
+          Text('💡 Tips for a Successful Live',
+              style: AppTextStyles.labelLarge
+                  .copyWith(color: const Color(0xFF92400E))),
           const SizedBox(height: 4),
           Text(
             '• Best time: 7–9 PM gets 3× more viewers\n• Show product close-ups and demo draping\n• Offer exclusive live-only discounts',
-            style: AppTextStyles.bodySmall.copyWith(color: const Color(0xFF78350F), height: 1.6),
+            style: AppTextStyles.bodySmall
+                .copyWith(color: const Color(0xFF78350F), height: 1.6),
           ),
         ],
       ),
@@ -299,7 +325,7 @@ class GoLiveSetupScreen extends StatelessWidget {
   Widget _buildStartButton(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.card,
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
@@ -310,7 +336,8 @@ class GoLiveSetupScreen extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.liveRed,
           padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
       ),
     );

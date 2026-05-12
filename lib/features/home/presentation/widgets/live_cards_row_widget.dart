@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../shared/widgets/live_badge.dart';
 import '../../../../shared/providers/live_providers.dart';
@@ -35,12 +34,17 @@ class LiveCardsRowWidget extends ConsumerWidget {
               ),
               child: Stack(
                 children: [
-                  Center(child: Text(session.thumbnailPlaceholder, style: const TextStyle(fontSize: 44))),
+                  Center(
+                      child: Text(session.thumbnailPlaceholder,
+                          style: const TextStyle(fontSize: 44))),
                   Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(18),
                       gradient: LinearGradient(
-                        colors: [Colors.transparent, Colors.black.withOpacity(0.75)],
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.75)
+                        ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         stops: const [0.35, 1.0],
@@ -56,7 +60,8 @@ class LiveCardsRowWidget extends ConsumerWidget {
                     top: 9,
                     right: 9,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 7, vertical: 3),
                       decoration: BoxDecoration(
                         color: Colors.black.withOpacity(0.55),
                         borderRadius: BorderRadius.circular(7),
@@ -64,11 +69,13 @@ class LiveCardsRowWidget extends ConsumerWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.remove_red_eye, color: Colors.white, size: 10),
+                          const Icon(Icons.remove_red_eye,
+                              color: Colors.white, size: 10),
                           const SizedBox(width: 3),
                           Text(
                             session.viewers.toString(),
-                            style: AppTextStyles.labelSmall.copyWith(color: Colors.white),
+                            style: AppTextStyles.labelSmall
+                                .copyWith(color: Colors.white),
                           ),
                         ],
                       ),
@@ -83,13 +90,15 @@ class LiveCardsRowWidget extends ConsumerWidget {
                       children: [
                         Text(
                           session.sellerName,
-                          style: AppTextStyles.labelMedium.copyWith(color: Colors.white, fontWeight: FontWeight.w800),
+                          style: AppTextStyles.labelMedium.copyWith(
+                              color: Colors.white, fontWeight: FontWeight.w800),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
                           session.category,
-                          style: AppTextStyles.labelSmall.copyWith(color: Colors.white.withOpacity(0.8)),
+                          style: AppTextStyles.labelSmall
+                              .copyWith(color: Colors.white.withOpacity(0.8)),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
