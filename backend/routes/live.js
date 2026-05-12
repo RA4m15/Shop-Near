@@ -25,8 +25,33 @@ router.post('/', auth, upload.single('thumbnail'), async (req, res) => {
       category: req.body.category,
       thumbnail: req.file ? req.file.path : ''
     });
+    
     await session.save();
+    
+    // Broadcast to all users that a new live session started
+    req.io.emit('live_update', { action: 'started', sessionId: session._id });
+    
     res.status(201).json(session);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// End live session (Seller only)
+router.put('/:id/end', auth, async (req, res) => {
+  try {
+    const session = await LiveSession.findById(req.params.id);
+    if (!session) return res.status(404).json({ message: 'Session not found' });
+    if (session.seller.toString() !== req.user.id) return res.status(403).json({ message: 'Unauthorized' });
+
+    session.isLive = false;
+    session.endedAt = Date.now();
+    await session.save();
+
+    // Broadcast update
+    req.io.emit('live_update', { action: 'ended', sessionId: session._id });
+
+    res.json({ message: 'Session ended' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

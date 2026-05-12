@@ -56,8 +56,12 @@ io.on('connection', (socket) => {
     console.log(`User joined room: ${roomId}`);
   });
 
-  socket.on('send_message', (data) => {
-    io.to(data.roomId).emit('receive_message', data);
+  socket.on('live_chat', (data) => {
+    io.to(data.roomId).emit('receive_live_chat', data);
+  });
+
+  socket.on('live_reaction', (data) => {
+    io.to(data.roomId).emit('receive_live_reaction', data);
   });
 
   socket.on('order_update', (data) => {

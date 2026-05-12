@@ -314,6 +314,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
           controller: controller,
           maxLines: maxLines,
           keyboardType: keyboardType,
+          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.text),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle:

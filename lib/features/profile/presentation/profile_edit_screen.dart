@@ -161,7 +161,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
           child: TextField(
             controller: controller,
             maxLines: maxLines,
-            style: AppTextStyles.bodyMedium,
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.text),
             decoration: InputDecoration(
               icon: Icon(icon, color: AppColors.primary, size: 20),
               border: InputBorder.none,
