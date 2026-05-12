@@ -6,6 +6,8 @@ import '../../features/home/presentation/home_screen.dart';
 import '../../features/discover/presentation/discover_screen.dart';
 import '../../features/discover/presentation/category_results_screen.dart';
 import '../../features/live/presentation/live_session_screen.dart';
+import '../../features/live/presentation/live_explorer_screen.dart';
+import '../../shared/models/live_session.dart';
 import '../../features/product/presentation/product_detail_screen.dart';
 import '../../features/shop/presentation/shop_page_screen.dart';
 import '../../features/cart/presentation/cart_screen.dart';
@@ -54,11 +56,19 @@ class AppRouter {
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
       ),
-      // Live session is full screen, so outside the shell
+      // Live explorer — buyer browses active sessions
       GoRoute(
         path: '/home/live',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const LiveSessionScreen(),
+        builder: (context, state) => const LiveExplorerScreen(),
+      ),
+      // Live session — actual full-screen video stream
+      GoRoute(
+        path: '/home/live-session',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => LiveSessionScreen(
+          session: state.extra as LiveSession?,
+        ),
       ),
       GoRoute(
         path: '/home/product/:id',
