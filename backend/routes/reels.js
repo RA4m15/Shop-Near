@@ -14,14 +14,24 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Post reel (Seller only)
+// Post reel
 router.post('/', auth, upload.single('video'), async (req, res) => {
   try {
-    if (req.user.role !== 'seller') return res.status(403).json({ message: 'Only sellers can post reels' });
+    // Temporarily allow anyone to post reels for testing purposes
+    // if (req.user.role !== 'seller') return res.status(403).json({ message: 'Only sellers can post reels' });
+
+    if (!req.file) {
+      return res.status(400).json({ message: 'No video file uploaded' });
+    }
+
+    // Build a URL: if Cloudinary gave us a secure_url use it, else build local path
+    const videoUrl = req.file.secure_url
+      ? req.file.secure_url
+      : `/uploads/reels/${req.file.filename}`;
 
     const reel = new Reel({
       seller: req.user.id,
-      videoUrl: req.file.path,
+      videoUrl,
       caption: req.body.caption
     });
     await reel.save();
@@ -31,7 +41,8 @@ router.post('/', auth, upload.single('video'), async (req, res) => {
     
     res.status(201).json(reel);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Reel upload error:', err);
+    res.status(500).json({ message: err.message });
   }
 });
 

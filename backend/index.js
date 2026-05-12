@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const http = require('http');
+const path = require('path');
 const { Server } = require('socket.io');
 const connectDB = require('./config/db');
 require('dotenv').config();
@@ -21,8 +22,21 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Range'],
+  exposedHeaders: ['Content-Range', 'Accept-Ranges', 'Content-Length', 'Content-Type'],
+}));
 app.use(express.json());
+
+// Serve uploaded files
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Accept-Ranges', 'bytes');
+  next();
+}, express.static(path.join(__dirname, 'uploads')));
 
 // MongoDB Connection
 connectDB();
@@ -64,7 +78,6 @@ io.on('connection', (socket) => {
   });
 
   socket.on('order_update', (data) => {
-    // Notify specific user or seller
     io.emit('order_notification', data);
   });
 
@@ -78,7 +91,7 @@ app.get('/', (req, res) => {
   res.send('Shop-Near Backend API is running...');
 });
 
-// Error handling middleware
+// Global Error Handler
 app.use((err, req, res, next) => {
   console.error('🔥 Global Error Handler:', err);
   res.status(500).json({
