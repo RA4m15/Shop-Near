@@ -7,10 +7,8 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../shared/providers/reel_providers.dart';
 import '../../../shared/models/reel.dart';
 import 'package:video_player/video_player.dart';
-// Web-only imports
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html;
-import 'dart:ui_web' as ui;
+import '../../../core/constants/api_endpoints.dart';
+// Removed web-only imports to fix mobile build
 
 
 class ReelsScreen extends ConsumerStatefulWidget {
@@ -193,8 +191,6 @@ class _ReelVideoPlayerState extends State<ReelVideoPlayer> {
   bool _initialized = false;
   bool _error = false;
 
-  // Web only
-  late final String _viewId;
 
   String get _resolvedUrl {
     final videoUrl = widget.videoUrl;
@@ -205,50 +201,17 @@ class _ReelVideoPlayerState extends State<ReelVideoPlayer> {
     }
     // Relative path — strip leading slash to avoid double slash
     final rel = videoUrl.startsWith('/') ? videoUrl.substring(1) : videoUrl;
-    return 'http://localhost:5000/$rel';
+    // Use the base URL from ApiEndpoints
+    final baseUrl = ApiEndpoints.baseUrl.replaceAll('/api', '');
+    return '$baseUrl/$rel';
   }
 
   @override
   void initState() {
     super.initState();
-    if (kIsWeb) {
-      _viewId = 'reel-video-${widget.videoUrl.hashCode}-${DateTime.now().millisecondsSinceEpoch}';
-      _registerWebVideo();
-    } else {
-      _initMobilePlayer();
-    }
+    _initMobilePlayer();
   }
 
-  void _registerWebVideo() {
-    final url = _resolvedUrl;
-    if (url.isEmpty) {
-      setState(() => _error = true);
-      return;
-    }
-
-    final videoEl = html.VideoElement()
-      ..src = url
-      ..autoplay = true
-      ..loop = true
-      ..muted = false
-      ..controls = false
-      ..style.width = '100%'
-      ..style.height = '100%'
-      ..style.objectFit = 'cover'
-      ..setAttribute('playsinline', '')
-      ..setAttribute('crossorigin', 'anonymous');
-
-    videoEl.onError.listen((_) {
-      debugPrint('HTML video error for: $url');
-      if (mounted) setState(() => _error = true);
-    });
-    videoEl.onCanPlay.listen((_) {
-      videoEl.play();
-    });
-
-    ui.platformViewRegistry.registerViewFactory(_viewId, (int id) => videoEl);
-    setState(() {});
-  }
 
   Future<void> _initMobilePlayer() async {
     final url = _resolvedUrl;
@@ -292,9 +255,6 @@ class _ReelVideoPlayerState extends State<ReelVideoPlayer> {
       );
     }
 
-    if (kIsWeb) {
-      return HtmlElementView(viewType: _viewId);
-    }
 
     if (!_initialized || _controller == null) {
       return const Center(child: CircularProgressIndicator(color: Colors.white));
