@@ -19,4 +19,19 @@ class LiveSessionRepository {
       rethrow;
     }
   }
+
+  Future<LiveSession> startLiveSession(String title, String category) async {
+    try {
+      final response = await _apiClient.post(ApiEndpoints.live, data: {
+        'title': title,
+        'category': category,
+      });
+      if (response.statusCode == 201) {
+        return LiveSession.fromMap(response.data);
+      }
+      throw Exception('Failed to start live session');
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

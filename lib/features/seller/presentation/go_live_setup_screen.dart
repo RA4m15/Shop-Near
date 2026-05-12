@@ -1,10 +1,105 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:camera/camera.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/providers/repository_providers.dart';
+import '../../../shared/providers/live_providers.dart';
 
-class GoLiveSetupScreen extends StatelessWidget {
+class GoLiveSetupScreen extends ConsumerStatefulWidget {
   const GoLiveSetupScreen({super.key});
+
+  @override
+  ConsumerState<GoLiveSetupScreen> createState() => _GoLiveSetupScreenState();
+}
+
+class _GoLiveSetupScreenState extends ConsumerState<GoLiveSetupScreen> {
+  final _titleController = TextEditingController();
+  String _selectedCategory = 'Fashion & Clothing 👗';
+  bool _isLoading = false;
+  CameraController? _cameraController;
+  bool _isCameraInitialized = false;
+
+  final List<String> _categories = [
+    'Fashion & Clothing 👗',
+    'Organic & Natural 🌿',
+    'Food & Snacks 🍕',
+    'Electronics & Gadgets 📱',
+    'Handicrafts 🎨'
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeCamera();
+  }
+
+  Future<void> _initializeCamera() async {
+    final status = await Permission.camera.request();
+    if (status.isGranted) {
+      final cameras = await availableCameras();
+      if (cameras.isNotEmpty) {
+        _cameraController = CameraController(
+          cameras.firstWhere(
+            (cam) => cam.lensDirection == CameraLensDirection.front,
+            orElse: () => cameras.first,
+          ),
+          ResolutionPreset.medium,
+        );
+
+        try {
+          await _cameraController!.initialize();
+          if (mounted) {
+            setState(() => _isCameraInitialized = true);
+          }
+        } catch (e) {
+          debugPrint('Camera init error: $e');
+        }
+      }
+    }
+  }
+
+  Future<void> _startLive() async {
+    if (_titleController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a session title')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      final repository = ref.read(liveSessionRepositoryProvider);
+      final session = await repository.startLiveSession(
+        _titleController.text.trim(),
+        _selectedCategory,
+      );
+
+      // Invalidate the provider so the buyer panel updates
+      ref.invalidate(liveSessionsProvider);
+
+      if (mounted) {
+        context.push('/home/live', extra: session);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to start live: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _cameraController?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,37 +147,28 @@ class GoLiveSetupScreen extends StatelessWidget {
       width: double.infinity,
       height: 260,
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF0D0D1A), Color(0xFF1A0A2E)],
-        ),
+        color: Colors.black,
       ),
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 90,
-                height: 90,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                      color: Colors.white.withOpacity(0.3), width: 3),
+          if (_isCameraInitialized && _cameraController != null)
+            SizedBox.expand(
+              child: CameraPreview(_cameraController!),
+            )
+          else
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const CircularProgressIndicator(color: AppColors.primary),
+                const SizedBox(height: 10),
+                Text(
+                  'Initializing camera...',
+                  style: AppTextStyles.labelMedium
+                      .copyWith(color: Colors.white.withOpacity(0.5)),
                 ),
-                alignment: Alignment.center,
-                child: const Text('😊', style: TextStyle(fontSize: 40)),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Camera preview',
-                style: AppTextStyles.labelMedium
-                    .copyWith(color: Colors.white.withOpacity(0.5)),
-              ),
-            ],
-          ),
+              ],
+            ),
           Positioned(
             bottom: 16,
             child: Row(
@@ -124,8 +210,11 @@ class GoLiveSetupScreen extends StatelessWidget {
           Text('Live Session Title *', style: AppTextStyles.labelMedium),
           const SizedBox(height: 6),
           TextField(
+            controller: _titleController,
+            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.text),
             decoration: InputDecoration(
               hintText: 'e.g. New Saree Collection Launch 🌸',
+              hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.muted),
               filled: true,
               fillColor: AppColors.background,
               border: OutlineInputBorder(
@@ -153,18 +242,16 @@ class GoLiveSetupScreen extends StatelessWidget {
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 isExpanded: true,
-                value: 'Fashion & Clothing 👗',
-                items: [
-                  'Fashion & Clothing 👗',
-                  'Organic & Natural 🌿',
-                  'Food & Snacks 🍕'
-                ].map((String item) {
+                value: _selectedCategory,
+                items: _categories.map((String item) {
                   return DropdownMenuItem<String>(
                     value: item,
                     child: Text(item, style: AppTextStyles.bodyMedium),
                   );
                 }).toList(),
-                onChanged: (_) {},
+                onChanged: (val) {
+                  if (val != null) setState(() => _selectedCategory = val);
+                },
               ),
             ),
           ),
@@ -330,9 +417,11 @@ class GoLiveSetupScreen extends StatelessWidget {
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
       child: ElevatedButton.icon(
-        onPressed: () => context.push('/home/live'),
-        icon: const Icon(Icons.sensors),
-        label: const Text('Start Live Now'),
+        onPressed: _isLoading ? null : _startLive,
+        icon: _isLoading 
+          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+          : const Icon(Icons.sensors),
+        label: Text(_isLoading ? 'Starting...' : 'Start Live Now'),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.liveRed,
           padding: const EdgeInsets.symmetric(vertical: 16),

@@ -12,6 +12,8 @@ import 'widgets/live_cards_row_widget.dart';
 import 'widgets/product_grid_widget.dart';
 import 'widgets/community_post_card.dart';
 import '../../../shared/widgets/shimmer_placeholder.dart';
+import '../../../shared/providers/live_providers.dart';
+import '../../../shared/providers/repository_providers.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -25,6 +27,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final List<String> _categories = [
     'All', 'Fashion', 'Food', 'Electronics', 'Handicraft', 'Grocery', 'Jewellery'
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Connect socket and listen for live updates
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final socketService = ref.read(socketServiceProvider);
+      socketService.connect();
+      socketService.on('live_update', (data) {
+        // When a seller starts or stops a live, refresh our list
+        ref.invalidate(liveSessionsProvider);
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
