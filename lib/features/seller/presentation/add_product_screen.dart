@@ -99,20 +99,20 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
           onPressed: () => context.canPop() ? context.pop() : context.go('/seller'),
         ),
         title: Text('Add Product', style: AppTextStyles.h3),
+<<<<<<< HEAD
+=======
         actions: [
           TextButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Draft saved successfully! 💾')),
-              );
-            },
+            onPressed: () {},
             child: Text(
               'Save Draft',
-              style: AppTextStyles.labelMedium.copyWith(color: AppColors.primary),
+              style:
+                  AppTextStyles.labelMedium.copyWith(color: AppColors.primary),
             ),
           ),
           const SizedBox(width: 8),
         ],
+>>>>>>> 156ccf516472535c56e5e4a5f6e50a942847eeb6
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -134,6 +134,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     return Container(
       margin: const EdgeInsets.all(16),
       height: 160,
+<<<<<<< HEAD
       child: _selectedImages.isEmpty
           ? GestureDetector(
               onTap: _pickImage,
@@ -206,6 +207,29 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                 );
               },
             ),
+=======
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+            color: AppColors.border, width: 2, style: BorderStyle.solid),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.camera_alt, size: 32, color: AppColors.muted),
+            const SizedBox(height: 8),
+            Text('Add Product Photos',
+                style:
+                    AppTextStyles.labelLarge.copyWith(color: AppColors.muted)),
+            Text('Tap to upload (up to 8 photos)',
+                style:
+                    AppTextStyles.bodySmall.copyWith(color: AppColors.muted)),
+          ],
+        ),
+      ),
+>>>>>>> 156ccf516472535c56e5e4a5f6e50a942847eeb6
     );
   }
 
@@ -227,11 +251,13 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
               children: [
                 Text(
                   'Add a product demo video',
-                  style: AppTextStyles.labelMedium.copyWith(color: AppColors.secondary),
+                  style: AppTextStyles.labelMedium
+                      .copyWith(color: AppColors.secondary),
                 ),
                 Text(
                   'Videos increase conversion by 3x! 🚀',
-                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted),
+                  style:
+                      AppTextStyles.bodySmall.copyWith(color: AppColors.muted),
                 ),
               ],
             ),
@@ -247,8 +273,19 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+<<<<<<< HEAD
           _buildTextField('Product Name *', 'e.g. Silk Banarasi Saree', _nameController),
           _buildDropdownField('Category *', ['Fashion & Clothing', 'Organic & Natural', 'Food & Snacks', 'Jewellery']),
+=======
+          _buildTextField(
+              'Product Name *', 'e.g. Silk Banarasi Saree — Royal Blue'),
+          _buildDropdownField('Category *', [
+            'Fashion & Clothing',
+            'Organic & Natural',
+            'Food & Snacks',
+            'Jewellery'
+          ]),
+>>>>>>> 156ccf516472535c56e5e4a5f6e50a942847eeb6
           Row(
             children: [
               Expanded(child: _buildTextField('Price (₹) *', '1299', _priceController, keyboardType: TextInputType.number)),
@@ -256,9 +293,16 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
               Expanded(child: _buildTextField('MRP (₹)', '2100', _oldPriceController, keyboardType: TextInputType.number)),
             ],
           ),
+<<<<<<< HEAD
           _buildTextField('Stock Quantity *', 'e.g. 50', _stockController, keyboardType: TextInputType.number),
           _buildTextField('Description', 'Describe your product...', _descriptionController, maxLines: 4),
           _buildTextField('Tags (comma-separated)', 'saree, handloom, silk', _tagsController),
+=======
+          _buildTextField('Stock Quantity *', 'e.g. 50'),
+          _buildTextField('Description', 'Describe your product...',
+              maxLines: 4),
+          _buildTextField('Tags (comma-separated)', 'saree, handloom, silk'),
+>>>>>>> 156ccf516472535c56e5e4a5f6e50a942847eeb6
         ],
       ),
     );
@@ -276,7 +320,8 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
           keyboardType: keyboardType,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.muted),
+            hintStyle:
+                AppTextStyles.bodyMedium.copyWith(color: AppColors.muted),
             filled: true,
             fillColor: AppColors.background,
             border: OutlineInputBorder(
@@ -287,7 +332,8 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: AppColors.border, width: 1.5),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           ),
         ),
         const SizedBox(height: 14),
@@ -363,7 +409,8 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
               value: value,
               onChanged: (_) {},
               activeColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4)),
             ),
           ),
           const SizedBox(width: 10),
@@ -388,9 +435,12 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: AppColors.border, width: 2),
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
               ),
-              child: Text('Preview', style: AppTextStyles.labelLarge.copyWith(color: AppColors.text)),
+              child: Text('Preview',
+                  style:
+                      AppTextStyles.labelLarge.copyWith(color: AppColors.text)),
             ),
           ),
           const SizedBox(width: 12),
@@ -399,7 +449,8 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
               onPressed: isLoading ? null : _publishProduct,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
               ),
               child: isLoading 
                 ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))

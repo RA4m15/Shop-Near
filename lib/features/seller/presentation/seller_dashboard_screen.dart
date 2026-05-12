@@ -19,8 +19,12 @@ class SellerDashboardScreen extends ConsumerStatefulWidget {
   ConsumerState<SellerDashboardScreen> createState() => _SellerDashboardScreenState();
 }
 
-class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen>
+<<<<<<< HEAD
+class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen> with SingleTickerProviderStateMixin {
+=======
+class _SellerDashboardScreenState extends State<SellerDashboardScreen>
     with SingleTickerProviderStateMixin {
+>>>>>>> 156ccf516472535c56e5e4a5f6e50a942847eeb6
   late AnimationController _livePulseController;
 
   @override
@@ -131,11 +135,16 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen>
                   ),
                   const SizedBox(height: 4),
                   Text(
+<<<<<<< HEAD
                     user?.name ?? 'Seller',
+                    style: AppTextStyles.h1.copyWith(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900),
+=======
+                    'Priya Fashion',
                     style: AppTextStyles.h1.copyWith(
                         color: Colors.white,
                         fontSize: 28,
                         fontWeight: FontWeight.w900),
+>>>>>>> 156ccf516472535c56e5e4a5f6e50a942847eeb6
                   ),
                 ],
               ),
@@ -403,6 +412,7 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen>
   }
 
   Widget _buildRecentOrders(BuildContext context) {
+<<<<<<< HEAD
     final ordersAsync = ref.watch(sellerOrdersProvider);
 
     return ordersAsync.when(
@@ -453,6 +463,26 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen>
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, stack) => Center(child: Text('Error: $err')),
+=======
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: [
+          _buildOrderItem(
+              context,
+              '👗',
+              'Silk Saree Blue',
+              'Anjali S. · ₹1,299',
+              'Pending',
+              const Color(0xFFFEF3C7),
+              const Color(0xFF92400E)),
+          _buildOrderItem(context, '👗', 'Banarasi Dupatta', 'Meena R. · ₹850',
+              'Packing', const Color(0xFFDBEAFE), const Color(0xFF1E40AF)),
+          _buildOrderItem(context, '👗', 'Cotton Kurti Set', 'Kavita D. · ₹699',
+              'Delivered', const Color(0xFFDCFCE7), const Color(0xFF166534)),
+        ],
+      ),
+>>>>>>> 156ccf516472535c56e5e4a5f6e50a942847eeb6
     );
   }
 
