@@ -3,9 +3,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
-const path = require('path');
 const connectDB = require('./config/db');
-require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
@@ -51,11 +50,6 @@ app.use('/api/sellers', sellerRoutes);
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
-  socket.on('identify', (userId) => {
-    socket.userId = userId;
-    console.log(`Socket ${socket.id} identified as user: ${userId}`);
-  });
-
   socket.on('join_room', (roomId) => {
     socket.join(roomId);
     console.log(`User joined room: ${roomId}`);
@@ -70,26 +64,12 @@ io.on('connection', (socket) => {
   });
 
   socket.on('order_update', (data) => {
+    // Notify specific user or seller
     io.emit('order_notification', data);
   });
 
-  socket.on('disconnect', async () => {
-    console.log('User disconnected:', socket.id);
-    if (socket.userId) {
-      try {
-        const LiveSession = require('./models/LiveSession');
-        const sessions = await LiveSession.find({ seller: socket.userId, isLive: true });
-        for (let session of sessions) {
-          session.isLive = false;
-          session.endedAt = Date.now();
-          await session.save();
-          io.emit('live_update', { action: 'ended', sessionId: session._id });
-          console.log(`Automatically ended session ${session._id} due to disconnect`);
-        }
-      } catch (err) {
-        console.error('Error auto-ending sessions:', err);
-      }
-    }
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
   });
 });
 

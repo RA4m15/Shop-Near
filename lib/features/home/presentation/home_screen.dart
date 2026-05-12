@@ -15,7 +15,6 @@ import 'widgets/community_post_card.dart';
 import '../../../shared/widgets/shimmer_placeholder.dart';
 import '../../../shared/providers/live_providers.dart';
 import '../../../shared/providers/repository_providers.dart';
-import '../../auth/providers/auth_notifier.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});

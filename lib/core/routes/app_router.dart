@@ -6,8 +6,6 @@ import '../../features/home/presentation/home_screen.dart';
 import '../../features/discover/presentation/discover_screen.dart';
 import '../../features/discover/presentation/category_results_screen.dart';
 import '../../features/live/presentation/live_session_screen.dart';
-import '../../features/live/presentation/live_explorer_screen.dart';
-import '../../shared/models/live_session.dart';
 import '../../features/product/presentation/product_detail_screen.dart';
 import '../../features/shop/presentation/shop_page_screen.dart';
 import '../../features/cart/presentation/cart_screen.dart';
@@ -34,8 +32,10 @@ import '../../shared/widgets/app_bottom_nav.dart';
 import '../../shared/widgets/seller_bottom_nav.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
-final GlobalKey<NavigatorState> _buyerShellNavigatorKey = GlobalKey<NavigatorState>();
-final GlobalKey<NavigatorState> _sellerShellNavigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> _buyerShellNavigatorKey =
+    GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> _sellerShellNavigatorKey =
+    GlobalKey<NavigatorState>();
 
 class AppRouter {
   static final router = GoRouter(
@@ -58,14 +58,7 @@ class AppRouter {
       GoRoute(
         path: '/home/live',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const LiveExplorerScreen(),
-      ),
-      GoRoute(
-        path: '/home/live-session',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => LiveSessionScreen(
-          session: state.extra as LiveSession?,
-        ),
+        builder: (context, state) => const LiveSessionScreen(),
       ),
       GoRoute(
         path: '/home/product/:id',
@@ -122,7 +115,7 @@ class AppRouter {
           name: state.pathParameters['name'] ?? 'Chat',
         ),
       ),
-      
+
       // Buyer Shell Route
       ShellRoute(
         navigatorKey: _buyerShellNavigatorKey,
@@ -190,7 +183,7 @@ class AppRouter {
           ),
         ],
       ),
-      
+
       // Seller full screen routes
       GoRoute(
         path: '/seller/products/add',

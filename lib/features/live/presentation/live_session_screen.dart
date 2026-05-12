@@ -31,13 +31,6 @@ class _LiveSessionScreenState extends ConsumerState<LiveSessionScreen> with Tick
   final TextEditingController _chatController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final List<Map<String, dynamic>> _chatMessages = [];
-  bool get _isBroadcaster {
-    final user = ref.read(authControllerProvider).user;
-    if (user == null) return false;
-    if (widget.session == null) return user.role == 'seller';
-    return user.id == widget.session!.sellerId;
-  }
-
   @override
   void initState() {
     super.initState();
@@ -78,14 +71,14 @@ class _LiveSessionScreenState extends ConsumerState<LiveSessionScreen> with Tick
         onTokenPrivilegeWillExpire: (RtcConnection connection, String token) {
           debugPrint('[onTokenPrivilegeWillExpire] connection: ${connection.toJson()}, token: $token');
         },
-        onConnectionStateChanged: (RtcConnection connection, ConnectionStateType state, ConnectionChangedReasonType reason) {
-          debugPrint('Agora Connection State: $state, Reason: $reason');
-        },
       ),
     );
 
+    final user = ref.read(authControllerProvider).user;
+    final isBroadcaster = user?.role == 'seller';
+
     await _engine!.setClientRole(
-      role: _isBroadcaster ? ClientRoleType.clientRoleBroadcaster : ClientRoleType.clientRoleAudience,
+      role: isBroadcaster ? ClientRoleType.clientRoleBroadcaster : ClientRoleType.clientRoleAudience,
     );
     await _engine!.enableVideo();
     await _engine!.startPreview();
@@ -94,11 +87,7 @@ class _LiveSessionScreenState extends ConsumerState<LiveSessionScreen> with Tick
       token: AgoraConfig.token,
       channelId: widget.session?.id ?? 'demo_channel',
       uid: 0,
-      options: ChannelMediaOptions(
-        publishCameraTrack: _isBroadcaster,
-        publishMicrophoneTrack: _isBroadcaster,
-        clientRoleType: _isBroadcaster ? ClientRoleType.clientRoleBroadcaster : ClientRoleType.clientRoleAudience,
-      ),
+      options: const ChannelMediaOptions(),
     );
     setState(() => _isJoined = true);
 
@@ -285,7 +274,10 @@ class _LiveSessionScreenState extends ConsumerState<LiveSessionScreen> with Tick
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (_isBroadcaster) {
+    final user = ref.read(authControllerProvider).user;
+    final isBroadcaster = user?.role == 'seller';
+
+    if (isBroadcaster) {
       return AgoraVideoView(
         controller: VideoViewController(
           rtcEngine: _engine!,
@@ -294,15 +286,12 @@ class _LiveSessionScreenState extends ConsumerState<LiveSessionScreen> with Tick
       );
     }
 
-    final channelId = widget.session?.id ?? 'demo_channel';
-    debugPrint("Joining Agora Channel: $channelId as ${_isBroadcaster ? 'Broadcaster' : 'Audience'}");
-
     if (_remoteUid != null) {
       return AgoraVideoView(
         controller: VideoViewController.remote(
           rtcEngine: _engine!,
           canvas: VideoCanvas(uid: _remoteUid),
-          connection: RtcConnection(channelId: channelId),
+          connection: RtcConnection(channelId: widget.session?.id ?? 'demo_channel'),
         ),
       );
     } else {
@@ -314,17 +303,13 @@ class _LiveSessionScreenState extends ConsumerState<LiveSessionScreen> with Tick
             end: Alignment.bottomRight,
           ),
         ),
-        child: Center(
+        child: const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('⌛', style: TextStyle(fontSize: 60)),
-              const SizedBox(height: 10),
-              const Text('Waiting for seller to start...', style: TextStyle(color: Colors.white, fontSize: 16)),
-              const SizedBox(height: 10),
-              Text('Channel: $channelId', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
-              if (!_isBroadcaster)
-                Text('Status: Searching for broadcaster...', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+              Text('⌛', style: TextStyle(fontSize: 60)),
+              SizedBox(height: 10),
+              Text('Waiting for seller to start...', style: TextStyle(color: Colors.white, fontSize: 16)),
             ],
           ),
         ),
