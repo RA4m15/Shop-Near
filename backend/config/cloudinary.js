@@ -1,6 +1,7 @@
 const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 cloudinary.config({
@@ -9,15 +10,21 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'shop-near',
-    resource_type: 'auto', // This allows both images and videos
-    allowed_formats: ['jpg', 'png', 'mp4', 'mov']
+// Use local disk storage as fallback (avoids Cloudinary credential issues)
+const uploadsDir = path.join(__dirname, '..', 'uploads', 'reels');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadsDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname) || '.mp4';
+    cb(null, `reel_${Date.now()}${ext}`);
   }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
 module.exports = { cloudinary, upload };
+

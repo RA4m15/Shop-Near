@@ -22,8 +22,20 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Range'],
+  exposedHeaders: ['Content-Range', 'Accept-Ranges', 'Content-Length', 'Content-Type'],
+}));
 app.use(express.json());
+// Serve uploaded files with proper CORS headers for video streaming
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Accept-Ranges', 'bytes');
+  next();
+}, express.static(path.join(__dirname, 'uploads')));
 
 // MongoDB Connection
 connectDB();
@@ -77,6 +89,15 @@ io.on('connection', (socket) => {
 // Routes Placeholder
 app.get('/', (req, res) => {
   res.send('Shop-Near Backend API is running...');
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled Error:', err);
+  res.status(500).json({ 
+    message: err.message || 'Internal Server Error',
+    error: err
+  });
 });
 
 // Start Server

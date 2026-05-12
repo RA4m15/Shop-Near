@@ -1,10 +1,108 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:video_player/video_player.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/providers/repository_providers.dart';
+import '../../../shared/providers/reel_providers.dart';
 
-class PostReelScreen extends StatelessWidget {
+class PostReelScreen extends ConsumerStatefulWidget {
   const PostReelScreen({super.key});
+
+  @override
+  ConsumerState<PostReelScreen> createState() => _PostReelScreenState();
+}
+
+class _PostReelScreenState extends ConsumerState<PostReelScreen> {
+  final ImagePicker _picker = ImagePicker();
+  XFile? _selectedVideo;
+  VideoPlayerController? _videoController;
+  final TextEditingController _captionController = TextEditingController();
+  bool _isUploading = false;
+
+  Future<void> _pickVideo() async {
+    try {
+      final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
+      if (video != null) {
+        setState(() {
+          _selectedVideo = video;
+        });
+        _initializeVideoPlayer();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to pick video: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _initializeVideoPlayer() async {
+    _videoController?.dispose();
+    
+    if (kIsWeb) {
+      _videoController = VideoPlayerController.networkUrl(Uri.parse(_selectedVideo!.path));
+    } else {
+      _videoController = VideoPlayerController.file(File(_selectedVideo!.path));
+    }
+
+    await _videoController!.initialize();
+    _videoController!.setLooping(true);
+    _videoController!.play();
+    setState(() {});
+  }
+
+  Future<void> _uploadReel() async {
+    if (_selectedVideo == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a video first')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isUploading = true;
+    });
+
+    try {
+      final repository = ref.read(reelRepositoryProvider);
+      await repository.uploadReel(_selectedVideo!, _captionController.text.trim());
+      
+      // Refresh reels
+      ref.invalidate(reelsProvider);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Reel posted successfully! 🎉')),
+        );
+        context.pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to post reel: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUploading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _videoController?.dispose();
+    _captionController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,82 +114,91 @@ class PostReelScreen extends StatelessWidget {
         ),
         title: Text('Post Reel', style: AppTextStyles.h3),
         actions: [
-          TextButton(
-            onPressed: () => context.pop(),
-            child: Text('Next', style: AppTextStyles.labelMedium.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800)),
-          ),
+          if (_isUploading)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
+            )
+          else
+            TextButton(
+              onPressed: _uploadReel,
+              child: Text('Post', style: AppTextStyles.labelMedium.copyWith(color: AppColors.primary, fontWeight: FontWeight.w800)),
+            ),
         ],
       ),
       body: Column(
         children: [
-          // Camera Preview Placeholder
+          // Caption Input
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _captionController,
+              decoration: const InputDecoration(
+                hintText: 'Write a caption...',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 2,
+            ),
+          ),
+
+          // Camera / Video Preview
           Expanded(
             child: Container(
               width: double.infinity,
-              margin: const EdgeInsets.all(16),
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 color: Colors.black,
                 borderRadius: BorderRadius.circular(24),
-                image: const DecorationImage(
-                  image: NetworkImage('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800'),
-                  fit: BoxFit.cover,
-                  opacity: 0.6,
-                ),
               ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  const Icon(Icons.videocam_outlined, color: Colors.white, size: 64),
-                  Positioned(
-                    bottom: 20,
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 4),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: _selectedVideo != null && _videoController != null && _videoController!.value.isInitialized
+                    ? AspectRatio(
+                        aspectRatio: _videoController!.value.aspectRatio,
+                        child: VideoPlayer(_videoController!),
+                      )
+                    : Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.videocam_outlined, color: Colors.white, size: 64),
+                            const SizedBox(height: 16),
+                            Text('No video selected', style: AppTextStyles.bodyMedium.copyWith(color: Colors.white)),
+                          ],
+                        ),
                       ),
-                      child: const Icon(Icons.fiber_manual_record, color: Colors.red, size: 32),
-                    ),
-                  ),
-                ],
               ),
             ),
           ),
           
-          // Reel Tools
+          // Gallery Toggle
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildToolItem(Icons.music_note, 'Audio'),
-                _buildToolItem(Icons.auto_awesome, 'Effects'),
-                _buildToolItem(Icons.timer, 'Timer'),
-                _buildToolItem(Icons.speed, 'Speed'),
-              ],
-            ),
-          ),
-          
-          // Gallery / Capture Toggle
-          Padding(
-            padding: const EdgeInsets.only(bottom: 40),
+            padding: const EdgeInsets.only(bottom: 40, top: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: AppColors.card,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.photo_library_outlined, size: 18),
-                      const SizedBox(width: 8),
-                      Text('Gallery', style: AppTextStyles.labelMedium),
-                    ],
+                GestureDetector(
+                  onTap: _pickVideo,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.photo_library_outlined, size: 20, color: Colors.white),
+                        const SizedBox(width: 8),
+                        Text('Select Video', style: AppTextStyles.labelMedium.copyWith(color: Colors.white)),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -99,25 +206,6 @@ class PostReelScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildToolItem(IconData icon, String label) {
-    return Column(
-      children: [
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: AppColors.background,
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Icon(icon, size: 20),
-        ),
-        const SizedBox(height: 6),
-        Text(label, style: AppTextStyles.labelSmall.copyWith(fontSize: 10)),
-      ],
     );
   }
 }
