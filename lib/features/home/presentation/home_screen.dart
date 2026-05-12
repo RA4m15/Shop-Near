@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shop_near/features/auth/providers/auth_notifier.dart';
 import '../../../shared/providers/product_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -14,6 +15,7 @@ import 'widgets/community_post_card.dart';
 import '../../../shared/widgets/shimmer_placeholder.dart';
 import '../../../shared/providers/live_providers.dart';
 import '../../../shared/providers/repository_providers.dart';
+import '../../auth/providers/auth_notifier.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -33,8 +35,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.initState();
     // Connect socket and listen for live updates
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = ref.read(authControllerProvider).user;
       final socketService = ref.read(socketServiceProvider);
       socketService.connect();
+      
+      if (user != null) {
+        socketService.emit('identify', user.id);
+      }
+
       socketService.on('live_update', (data) {
         // When a seller starts or stops a live, refresh our list
         ref.invalidate(liveSessionsProvider);

@@ -81,7 +81,7 @@ class _GoLiveSetupScreenState extends ConsumerState<GoLiveSetupScreen> {
       ref.invalidate(liveSessionsProvider);
 
       if (mounted) {
-        context.push('/home/live', extra: session);
+        context.push('/home/live-session', extra: session);
       }
     } catch (e) {
       if (mounted) {
