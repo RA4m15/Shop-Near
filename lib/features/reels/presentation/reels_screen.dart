@@ -33,7 +33,9 @@ class _ReelsScreenState extends ConsumerState<ReelsScreen> {
           },
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err', style: const TextStyle(color: Colors.white))),
+        error: (err, stack) => Center(
+            child: Text('Error: $err',
+                style: const TextStyle(color: Colors.white))),
       ),
     );
   }
@@ -45,17 +47,18 @@ class _ReelsScreenState extends ConsumerState<ReelsScreen> {
         Container(
           width: double.infinity,
           height: double.infinity,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [const Color(0xFF2B1B54), const Color(0xFF1A1D2E)],
+              colors: [Color(0xFF2B1B54), Color(0xFF1A1D2E)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
           ),
           alignment: Alignment.center,
-          child: Text(reel.emoji ?? '🎬', style: const TextStyle(fontSize: 140)),
+          child:
+              Text(reel.emoji ?? '🎬', style: const TextStyle(fontSize: 140)),
         ),
-        
+
         // Dark Overlay at Bottom
         Positioned.fill(
           child: Container(
@@ -76,9 +79,11 @@ class _ReelsScreenState extends ConsumerState<ReelsScreen> {
           bottom: 120,
           child: Column(
             children: [
-              _buildReelAction(Icons.favorite, reel.likes.toString(), Colors.redAccent),
+              _buildReelAction(
+                  Icons.favorite, reel.likes.toString(), Colors.redAccent),
               const SizedBox(height: 20),
-              _buildReelAction(Icons.chat_bubble, reel.comments.toString(), Colors.white),
+              _buildReelAction(
+                  Icons.chat_bubble, reel.comments.toString(), Colors.white),
               const SizedBox(height: 20),
               _buildReelAction(Icons.share, 'Share', Colors.white),
               const SizedBox(height: 20),
@@ -92,7 +97,8 @@ class _ReelsScreenState extends ConsumerState<ReelsScreen> {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.white, width: 1.5),
                   ),
-                  child: const Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 20),
+                  child: const Icon(Icons.shopping_bag_outlined,
+                      color: Colors.white, size: 20),
                 ),
               ),
             ],
@@ -109,21 +115,32 @@ class _ReelsScreenState extends ConsumerState<ReelsScreen> {
             children: [
               Row(
                 children: [
-                  CircleAvatar(radius: 18, backgroundColor: Colors.white, child: Text(reel.emoji ?? '👤')),
+                  CircleAvatar(
+                      radius: 18,
+                      backgroundColor: Colors.white,
+                      child: Text(reel.emoji ?? '👤')),
                   const SizedBox(width: 10),
-                  Text(reel.sellerName, style: AppTextStyles.labelLarge.copyWith(color: Colors.white, fontWeight: FontWeight.w900)),
+                  Text(reel.sellerName,
+                      style: AppTextStyles.labelLarge.copyWith(
+                          color: Colors.white, fontWeight: FontWeight.w900)),
                   const SizedBox(width: 10),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(8)),
-                    child: Text('Follow', style: AppTextStyles.labelSmall.copyWith(color: Colors.white, fontSize: 10)),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(8)),
+                    child: Text('Follow',
+                        style: AppTextStyles.labelSmall
+                            .copyWith(color: Colors.white, fontSize: 10)),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
               Text(
                 reel.description,
-                style: AppTextStyles.bodyMedium.copyWith(color: Colors.white, fontSize: 13, height: 1.4),
+                style: AppTextStyles.bodyMedium
+                    .copyWith(color: Colors.white, fontSize: 13, height: 1.4),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -139,7 +156,9 @@ class _ReelsScreenState extends ConsumerState<ReelsScreen> {
       children: [
         Icon(icon, color: col, size: 30),
         const SizedBox(height: 4),
-        Text(label, style: AppTextStyles.labelSmall.copyWith(color: Colors.white, fontSize: 11)),
+        Text(label,
+            style: AppTextStyles.labelSmall
+                .copyWith(color: Colors.white, fontSize: 11)),
       ],
     );
   }

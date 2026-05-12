@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../shared/providers/repository_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../providers/auth_providers.dart';
 import '../providers/auth_notifier.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -21,7 +19,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _login() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
-    
+
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all fields')),
@@ -30,7 +28,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
 
     await ref.read(authControllerProvider.notifier).login(email, password);
-    
+
     final authState = ref.read(authControllerProvider);
     if (authState.status == AuthStatus.error) {
       if (mounted) {
@@ -74,12 +72,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               children: [
                 Text(
                   'Welcome Back!',
-                  style: AppTextStyles.h1.copyWith(color: Colors.white, fontSize: 32),
+                  style: AppTextStyles.h1
+                      .copyWith(color: Colors.white, fontSize: 32),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Sign in to continue shopping near you',
-                  style: AppTextStyles.bodyMedium.copyWith(color: Colors.white60),
+                  style:
+                      AppTextStyles.bodyMedium.copyWith(color: Colors.white60),
                 ),
                 const SizedBox(height: 48),
                 _buildTextField(
@@ -99,7 +99,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   alignment: Alignment.centerRight,
                   child: Text(
                     'Forgot Password?',
-                    style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary),
+                    style: AppTextStyles.bodySmall
+                        .copyWith(color: AppColors.primary),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -110,7 +111,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     onPressed: isLoading ? null : _login,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
                     ),
                     child: isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
@@ -123,13 +125,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   children: [
                     Text(
                       'Don\'t have an account? ',
-                      style: AppTextStyles.bodySmall.copyWith(color: Colors.white60),
+                      style: AppTextStyles.bodySmall
+                          .copyWith(color: Colors.white60),
                     ),
                     GestureDetector(
                       onTap: () => context.push('/register'),
                       child: Text(
                         'Register',
-                        style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
+                        style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],

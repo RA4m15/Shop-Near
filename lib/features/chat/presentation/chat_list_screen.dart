@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../shared/providers/chat_providers.dart';
-import '../../../shared/models/chat_preview.dart';
 
 class ChatListScreen extends ConsumerStatefulWidget {
   const ChatListScreen({super.key});
@@ -29,10 +28,12 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit_square, color: AppColors.primary, size: 22),
+            icon: const Icon(Icons.edit_square,
+                color: AppColors.primary, size: 22),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Start new conversation coming soon! 💬')),
+                const SnackBar(
+                    content: Text('Start new conversation coming soon! 💬')),
               );
             },
           ),
@@ -131,7 +132,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     required int unread,
   }) {
     return GestureDetector(
-    onTap: () => context.push('/home/chat/$name'),
+      onTap: () => context.push('/home/chat/$name'),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: const BoxDecoration(
@@ -173,14 +174,17 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(name, style: AppTextStyles.labelLarge.copyWith(fontSize: 14, fontWeight: FontWeight.w800)),
+                  Text(name,
+                      style: AppTextStyles.labelLarge
+                          .copyWith(fontSize: 14, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 3),
                   Text(
                     preview,
                     style: AppTextStyles.bodySmall.copyWith(
                       color: unread > 0 ? AppColors.text : AppColors.muted,
                       fontSize: 12,
-                      fontWeight: unread > 0 ? FontWeight.w700 : FontWeight.normal,
+                      fontWeight:
+                          unread > 0 ? FontWeight.w700 : FontWeight.normal,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -192,7 +196,9 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(time, style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted, fontSize: 11)),
+                Text(time,
+                    style: AppTextStyles.bodySmall
+                        .copyWith(color: AppColors.muted, fontSize: 11)),
                 if (unread > 0) ...[
                   const SizedBox(height: 6),
                   Container(
@@ -205,7 +211,10 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                     alignment: Alignment.center,
                     child: Text(
                       '$unread',
-                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],

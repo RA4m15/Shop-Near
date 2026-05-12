@@ -7,6 +7,8 @@ class User {
   final String? handle;
   final String? bio;
   final String? location;
+  final String? phone;
+  final UserSettings settings;
 
   User({
     required this.id,
@@ -17,7 +19,9 @@ class User {
     this.handle,
     this.bio,
     this.location,
-  });
+    this.phone,
+    UserSettings? settings,
+  }) : settings = settings ?? UserSettings();
 
   factory User.fromMap(Map<String, dynamic> map) {
     return User(
@@ -29,6 +33,68 @@ class User {
       handle: map['handle'],
       bio: map['bio'],
       location: map['location'],
+      phone: map['phone'],
+      settings: map['settings'] != null
+          ? UserSettings.fromMap(map['settings'])
+          : UserSettings(),
+    );
+  }
+}
+
+class UserSettings {
+  final bool liveSessionAlerts;
+  final bool orderUpdates;
+  final bool offersDeals;
+  final bool chatMessages;
+  final bool biometricLogin;
+  final bool publicProfile;
+
+  UserSettings({
+    this.liveSessionAlerts = true,
+    this.orderUpdates = true,
+    this.offersDeals = true,
+    this.chatMessages = false,
+    this.biometricLogin = true,
+    this.publicProfile = true,
+  });
+
+  factory UserSettings.fromMap(Map<String, dynamic> map) {
+    return UserSettings(
+      liveSessionAlerts: map['liveSessionAlerts'] ?? true,
+      orderUpdates: map['orderUpdates'] ?? true,
+      offersDeals: map['offersDeals'] ?? true,
+      chatMessages: map['chatMessages'] ?? false,
+      biometricLogin: map['biometricLogin'] ?? true,
+      publicProfile: map['publicProfile'] ?? true,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'liveSessionAlerts': liveSessionAlerts,
+      'orderUpdates': orderUpdates,
+      'offersDeals': offersDeals,
+      'chatMessages': chatMessages,
+      'biometricLogin': biometricLogin,
+      'publicProfile': publicProfile,
+    };
+  }
+
+  UserSettings copyWith({
+    bool? liveSessionAlerts,
+    bool? orderUpdates,
+    bool? offersDeals,
+    bool? chatMessages,
+    bool? biometricLogin,
+    bool? publicProfile,
+  }) {
+    return UserSettings(
+      liveSessionAlerts: liveSessionAlerts ?? this.liveSessionAlerts,
+      orderUpdates: orderUpdates ?? this.orderUpdates,
+      offersDeals: offersDeals ?? this.offersDeals,
+      chatMessages: chatMessages ?? this.chatMessages,
+      biometricLogin: biometricLogin ?? this.biometricLogin,
+      publicProfile: publicProfile ?? this.publicProfile,
     );
   }
 }
