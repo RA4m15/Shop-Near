@@ -57,6 +57,16 @@ class AppTheme {
           side: const BorderSide(color: AppColors.border),
         ),
       ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.card,
+        hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.muted),
+        labelStyle: AppTextStyles.labelMedium.copyWith(color: AppColors.text),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.border),
+        ),
+      ),
     );
   }
 
@@ -116,6 +126,16 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
           side: const BorderSide(color: AppColors.darkBorder),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.darkCard,
+        hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.darkMuted),
+        labelStyle: AppTextStyles.labelMedium.copyWith(color: AppColors.darkText),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.darkBorder),
         ),
       ),
     );
