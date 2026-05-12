@@ -1,35 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../shared/widgets/section_header.dart';
+import '../../../shared/providers/seller_providers.dart';
 
-class SellerAnalyticsScreen extends StatelessWidget {
+class SellerAnalyticsScreen extends ConsumerWidget {
   const SellerAnalyticsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final analyticsAsync = ref.watch(sellerAnalyticsProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Analytics & Insights', style: AppTextStyles.h3),
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.share_outlined)),
+          IconButton(
+            onPressed: () => ref.invalidate(sellerAnalyticsProvider),
+            icon: const Icon(Icons.refresh),
+          ),
           const SizedBox(width: 8),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _buildPeriodSelector(),
-            _buildSummaryGrid(),
-            const SectionHeader(title: '📈 Sales Trend'),
-            _buildSalesChart(),
-            const SectionHeader(title: '🏆 Top Selling Products'),
-            _buildTopProducts(),
-            const SectionHeader(title: '📡 Live Session Stats'),
-            _buildLiveStats(),
-            const SizedBox(height: 20),
-          ],
-        ),
+      body: analyticsAsync.when(
+        data: (analytics) => _buildContent(context, analytics),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err')),
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, Map<String, dynamic> analytics) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          _buildPeriodSelector(),
+          _buildSummaryGrid(analytics),
+          const SectionHeader(title: '📈 Sales Trend'),
+          _buildSalesChart(),
+          const SectionHeader(title: '🏆 Top Selling Products'),
+          _buildTopProducts(),
+          const SectionHeader(title: '📡 Live Session Stats'),
+          _buildLiveStats(),
+          const SizedBox(height: 20),
+        ],
       ),
     );
   }
@@ -58,24 +73,29 @@ class SellerAnalyticsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryGrid() {
+  Widget _buildSummaryGrid(Map<String, dynamic> analytics) {
+    final totalSales = analytics['totalSales']?.toString() ?? '₹0';
+    final ordersCount = analytics['ordersCount']?.toString() ?? '0';
+    final conversionRate = analytics['conversionRate']?.toString() ?? '0%';
+    final avgOrderValue = analytics['avgOrderValue']?.toString() ?? '₹0';
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
           Row(
             children: [
-              Expanded(child: _buildMetricCard('Total Sales', '₹48,290', '+12%', true)),
+              Expanded(child: _buildMetricCard('Total Sales', totalSales, '+0%', true)),
               const SizedBox(width: 12),
-              Expanded(child: _buildMetricCard('Orders', '142', '+5%', true)),
+              Expanded(child: _buildMetricCard('Orders', ordersCount, '+0%', true)),
             ],
           ),
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: _buildMetricCard('Conversion', '4.2%', '-1%', false)),
+              Expanded(child: _buildMetricCard('Conversion', conversionRate, '0%', true)),
               const SizedBox(width: 12),
-              Expanded(child: _buildMetricCard('Avg. Order', '₹340', '+8%', true)),
+              Expanded(child: _buildMetricCard('Avg. Order', avgOrderValue, '+0%', true)),
             ],
           ),
         ],

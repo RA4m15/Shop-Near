@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/providers/seller_providers.dart';
 
-class DiscoverScreen extends StatefulWidget {
+class DiscoverScreen extends ConsumerStatefulWidget {
   const DiscoverScreen({super.key});
 
   @override
-  State<DiscoverScreen> createState() => _DiscoverScreenState();
+  ConsumerState<DiscoverScreen> createState() => _DiscoverScreenState();
 }
 
-class _DiscoverScreenState extends State<DiscoverScreen> {
+class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   void _handleSearch(String query) {
@@ -21,6 +23,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final sellersAsync = ref.watch(sellersProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Discover', style: AppTextStyles.h3),
@@ -109,17 +113,22 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-              child: Text('TOP SELLERS NEAR INDORE', style: AppTextStyles.labelSmall.copyWith(color: AppColors.muted, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+              child: Text('TOP SELLERS NEAR YOU', style: AppTextStyles.labelSmall.copyWith(color: AppColors.muted, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: [
-                  _buildSellerItem(context, '👗', 'Priya Fashion', '⭐ 4.9 · Sarees & Kurtis · 2.1km away', true),
-                  _buildSellerItem(context, '🌿', 'Green Bazaar', '⭐ 4.8 · Organic Produce · 3.4km away', false),
-                  _buildSellerItem(context, '🎨', 'CraftHub MP', '⭐ 5.0 · Handicraft Art · 1.8km away', false),
-                  _buildSellerItem(context, '🍕', 'Chef Arjun Kitchen', '⭐ 4.7 · Homemade Food · 0.9km away', false),
-                ],
+              child: sellersAsync.when(
+                data: (sellers) => Column(
+                  children: sellers.map((seller) => _buildSellerItem(
+                    context, 
+                    seller.avatarPlaceholder, 
+                    seller.name, 
+                    '${seller.handle} · ${seller.location}', 
+                    false,
+                  )).toList(),
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, _) => Text('Error: $err'),
               ),
             ),
             const SizedBox(height: 20),

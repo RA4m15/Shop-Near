@@ -20,4 +20,23 @@ class Order {
     required this.orderDate,
     required this.productPlaceholder,
   });
+
+  factory Order.fromMap(Map<String, dynamic> map) {
+    final productMap = map['product'] as Map<String, dynamic>?;
+    final images = productMap?['images'] as List<dynamic>?;
+    
+    return Order(
+      id: map['_id'] ?? map['id'],
+      productId: productMap?['_id'] ?? map['productId'] ?? '',
+      productName: productMap?['name'] ?? map['productName'] ?? '',
+      buyerName: map['buyer']?['name'] ?? map['buyerName'] ?? '',
+      amount: (map['amount'] ?? 0).toDouble(),
+      status: map['status'] ?? 'Pending',
+      paymentMethod: map['paymentMethod'] ?? 'COD',
+      orderDate: DateTime.parse(map['orderDate'] ?? DateTime.now().toIso8601String()),
+      productPlaceholder: (images != null && images.isNotEmpty)
+          ? images[0]
+          : (map['productPlaceholder'] ?? '📦'),
+    );
+  }
 }

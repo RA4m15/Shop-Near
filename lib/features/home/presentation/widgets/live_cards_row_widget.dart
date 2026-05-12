@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../shared/widgets/live_badge.dart';
-import '../../../../data/mock/mock_data.dart';
+import '../../../../shared/providers/live_providers.dart';
 
-class LiveCardsRowWidget extends StatelessWidget {
+class LiveCardsRowWidget extends ConsumerWidget {
   const LiveCardsRowWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final sessions = MockData.liveSessions;
-    return SingleChildScrollView(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sessionsAsync = ref.watch(liveSessionsProvider);
+
+    return sessionsAsync.when(
+      data: (sessions) => SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.only(left: 16, right: 4, bottom: 12),
       child: Row(
@@ -108,6 +111,9 @@ class LiveCardsRowWidget extends StatelessWidget {
           );
         }).toList(),
       ),
+    ),
+      loading: () => const SizedBox(height: 178, child: Center(child: CircularProgressIndicator())),
+      error: (err, stack) => Center(child: Text('Error: $err')),
     );
   }
 }

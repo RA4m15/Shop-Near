@@ -54,10 +54,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
               const SizedBox(height: 28),
               RichText(
                 text: TextSpan(
-                  text: 'Bazar',
+                  text: 'Shop',
                   style: AppTextStyles.h1.copyWith(color: Colors.white, fontSize: 34),
                   children: const [
-                    TextSpan(text: 'Live', style: TextStyle(color: AppColors.primary)),
+                    TextSpan(text: 'Near', style: TextStyle(color: AppColors.primary)),
                   ],
                 ),
               ),
@@ -83,15 +83,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => context.go('/home'),
-                  child: const Text('🛒 Get Started as Buyer'),
+                  onPressed: () => context.push('/register'),
+                  child: const Text('🛒 Get Started'),
                 ),
               ),
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                  onPressed: () => context.go('/seller'),
+                  onPressed: () => context.push('/register'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white,
                     side: BorderSide(color: Colors.white.withOpacity(0.3), width: 2),
@@ -99,12 +99,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> with SingleTickerPr
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     textStyle: AppTextStyles.labelLarge,
                   ),
-                  child: const Text('🏪 I\'m a Seller →'),
+                  child: const Text('🏪 Become a Seller →'),
                 ),
               ),
               const SizedBox(height: 16),
               GestureDetector(
-                onTap: () => context.go('/home'),
+                onTap: () => context.push('/login'),
                 child: Text(
                   'Already have an account? Sign In',
                   style: AppTextStyles.bodySmall.copyWith(color: Colors.white54, decoration: TextDecoration.underline),

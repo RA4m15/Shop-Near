@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../shared/providers/product_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../shared/widgets/section_header.dart';
@@ -11,57 +13,53 @@ import 'widgets/product_grid_widget.dart';
 import 'widgets/community_post_card.dart';
 import '../../../shared/widgets/shimmer_placeholder.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  bool _isLoading = true;
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   String _selectedCategory = 'All';
   final List<String> _categories = [
     'All', 'Fashion', 'Food', 'Electronics', 'Handicraft', 'Grocery', 'Jewellery'
   ];
 
   @override
-  void initState() {
-    super.initState();
-    // Simulate loading
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) setState(() => _isLoading = false);
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final productsAsync = ref.watch(productsProvider);
+    final isLoading = productsAsync.isLoading;
+
     return Scaffold(
       appBar: _buildAppBar(context),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSearchBar(context),
-            const SectionHeader(title: 'Stories & Reels'),
-            _isLoading ? _buildStoryShimmer() : const StoryRowWidget(),
-            SectionHeader(
-              title: '🔴 Live Now',
-              actionText: 'See all',
-              onActionTap: () => context.push('/home/live'),
-            ),
-            _isLoading ? _buildLiveShimmer() : const LiveCardsRowWidget(),
-            ChipFilterRow(
-              items: _categories,
-              selectedItem: _selectedCategory,
-              onSelected: (val) => setState(() => _selectedCategory = val),
-            ),
-            const SectionHeader(title: '✨ Trending Near You', actionText: 'See all'),
-            _isLoading ? _buildGridShimmer() : ProductGridWidget(category: _selectedCategory),
-            const SectionHeader(title: '📱 Community Feed'),
-            _isLoading ? _buildPostShimmer() : const CommunityPostCard(),
-            const SizedBox(height: 10),
-          ],
+      body: RefreshIndicator(
+        onRefresh: () => ref.refresh(productsProvider.future),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSearchBar(context),
+              const SectionHeader(title: 'Stories & Reels'),
+              isLoading ? _buildStoryShimmer() : const StoryRowWidget(),
+              SectionHeader(
+                title: '🔴 Live Now',
+                actionText: 'See all',
+                onActionTap: () => context.push('/home/live'),
+              ),
+              isLoading ? _buildLiveShimmer() : const LiveCardsRowWidget(),
+              ChipFilterRow(
+                items: _categories,
+                selectedItem: _selectedCategory,
+                onSelected: (val) => setState(() => _selectedCategory = val),
+              ),
+              const SectionHeader(title: '✨ Trending Near You', actionText: 'See all'),
+              isLoading ? _buildGridShimmer() : ProductGridWidget(category: _selectedCategory),
+              const SectionHeader(title: '📱 Community Feed'),
+              isLoading ? _buildPostShimmer() : const CommunityPostCard(),
+              const SizedBox(height: 10),
+            ],
+          ),
         ),
       ),
     );
@@ -119,10 +117,10 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           RichText(
             text: TextSpan(
-              text: 'Bazar',
+              text: 'Shop',
               style: AppTextStyles.h2.copyWith(color: AppColors.text, fontSize: 22),
               children: const [
-                TextSpan(text: 'Live', style: TextStyle(color: AppColors.primary)),
+                TextSpan(text: 'Near', style: TextStyle(color: AppColors.primary)),
               ],
             ),
           ),

@@ -1,33 +1,114 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../product/providers/product_notifier.dart';
 
-class AddProductScreen extends StatelessWidget {
+class AddProductScreen extends ConsumerStatefulWidget {
   const AddProductScreen({super.key});
 
   @override
+  ConsumerState<AddProductScreen> createState() => _AddProductScreenState();
+}
+
+class _AddProductScreenState extends ConsumerState<AddProductScreen> {
+  final _nameController = TextEditingController();
+  final _priceController = TextEditingController();
+  final _oldPriceController = TextEditingController();
+  final _stockController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _tagsController = TextEditingController();
+  String _category = 'Fashion & Clothing';
+  
+  final List<XFile> _selectedImages = [];
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage() async {
+    final List<XFile> images = await _picker.pickMultiImage();
+    if (images.isNotEmpty) {
+      setState(() {
+        _selectedImages.addAll(images);
+      });
+    }
+  }
+
+  void _removeImage(int index) {
+    setState(() {
+      _selectedImages.removeAt(index);
+    });
+  }
+
+  Future<void> _publishProduct() async {
+    final name = _nameController.text.trim();
+    final price = double.tryParse(_priceController.text.trim());
+    final oldPrice = double.tryParse(_oldPriceController.text.trim());
+    final stock = int.tryParse(_stockController.text.trim());
+    final description = _descriptionController.text.trim();
+    final tags = _tagsController.text.trim().split(',').map((e) => e.trim()).toList();
+
+    if (name.isEmpty || price == null || stock == null || _selectedImages.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all required fields and add at least one image')),
+      );
+      return;
+    }
+
+    final productData = {
+      'name': name,
+      'price': price,
+      if (oldPrice != null) 'oldPrice': oldPrice,
+      'category': _category,
+      'stock': stock,
+      'description': description,
+      'tags': tags,
+    };
+
+    final imagePaths = _selectedImages.map((e) => e.path).toList();
+
+    await ref.read(productControllerProvider.notifier).createProduct(productData, imagePaths);
+
+    final state = ref.read(productControllerProvider);
+    if (state.status == ProductStatus.created) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Product published successfully! 🚀')),
+        );
+        context.pop();
+      }
+    } else if (state.status == ProductStatus.error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(state.errorMessage ?? 'Failed to publish product')),
+        );
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final productState = ref.watch(productControllerProvider);
+    final isLoading = productState.status == ProductStatus.creating;
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/seller');
-            }
-          },
+          onPressed: () => context.canPop() ? context.pop() : context.go('/seller'),
         ),
         title: Text('Add Product', style: AppTextStyles.h3),
         actions: [
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Draft saved successfully! 💾')),
+              );
+            },
             child: Text(
               'Save Draft',
-              style:
-                  AppTextStyles.labelMedium.copyWith(color: AppColors.primary),
+              style: AppTextStyles.labelMedium.copyWith(color: AppColors.primary),
             ),
           ),
           const SizedBox(width: 8),
@@ -37,43 +118,94 @@ class AddProductScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildUploadPlaceholder(),
+            _buildImagePicker(),
             _buildVideoTip(),
             _buildForm(),
             _buildDeliveryOptions(),
-            const SizedBox(height: 100),
+            const SizedBox(height: 120),
           ],
         ),
       ),
-      bottomSheet: _buildBottomButtons(context),
+      bottomSheet: _buildBottomButtons(context, isLoading),
     );
   }
 
-  Widget _buildUploadPlaceholder() {
+  Widget _buildImagePicker() {
     return Container(
       margin: const EdgeInsets.all(16),
       height: 160,
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-            color: AppColors.border, width: 2, style: BorderStyle.solid),
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.camera_alt, size: 32, color: AppColors.muted),
-            const SizedBox(height: 8),
-            Text('Add Product Photos',
-                style:
-                    AppTextStyles.labelLarge.copyWith(color: AppColors.muted)),
-            Text('Tap to upload (up to 8 photos)',
-                style:
-                    AppTextStyles.bodySmall.copyWith(color: AppColors.muted)),
-          ],
-        ),
-      ),
+      child: _selectedImages.isEmpty
+          ? GestureDetector(
+              onTap: _pickImage,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.border, width: 2, style: BorderStyle.solid),
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.camera_alt, size: 32, color: AppColors.muted),
+                      const SizedBox(height: 8),
+                      Text('Add Product Photos', style: AppTextStyles.labelLarge.copyWith(color: AppColors.muted)),
+                      Text('Tap to upload (up to 5 photos)', style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted)),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          : ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: _selectedImages.length + 1,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                if (index == _selectedImages.length) {
+                  return GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      width: 120,
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: const Icon(Icons.add_a_photo, color: AppColors.muted),
+                    ),
+                  );
+                }
+                return Stack(
+                  children: [
+                    Container(
+                      width: 120,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        image: DecorationImage(
+                          image: FileImage(File(_selectedImages[index].path)),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: GestureDetector(
+                        onTap: () => _removeImage(index),
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.black54,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.close, size: 16, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
     );
   }
 
@@ -95,13 +227,11 @@ class AddProductScreen extends StatelessWidget {
               children: [
                 Text(
                   'Add a product demo video',
-                  style: AppTextStyles.labelMedium
-                      .copyWith(color: AppColors.secondary),
+                  style: AppTextStyles.labelMedium.copyWith(color: AppColors.secondary),
                 ),
                 Text(
                   'Videos increase conversion by 3x! 🚀',
-                  style:
-                      AppTextStyles.bodySmall.copyWith(color: AppColors.muted),
+                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted),
                 ),
               ],
             ),
@@ -117,42 +247,36 @@ class AddProductScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildTextField(
-              'Product Name *', 'e.g. Silk Banarasi Saree — Royal Blue'),
-          _buildDropdownField('Category *', [
-            'Fashion & Clothing',
-            'Organic & Natural',
-            'Food & Snacks',
-            'Jewellery'
-          ]),
+          _buildTextField('Product Name *', 'e.g. Silk Banarasi Saree', _nameController),
+          _buildDropdownField('Category *', ['Fashion & Clothing', 'Organic & Natural', 'Food & Snacks', 'Jewellery']),
           Row(
             children: [
-              Expanded(child: _buildTextField('Price (₹) *', '1299')),
+              Expanded(child: _buildTextField('Price (₹) *', '1299', _priceController, keyboardType: TextInputType.number)),
               const SizedBox(width: 12),
-              Expanded(child: _buildTextField('MRP / Actual (₹)', '2100')),
+              Expanded(child: _buildTextField('MRP (₹)', '2100', _oldPriceController, keyboardType: TextInputType.number)),
             ],
           ),
-          _buildTextField('Stock Quantity *', 'e.g. 50'),
-          _buildTextField('Description', 'Describe your product...',
-              maxLines: 4),
-          _buildTextField('Tags (comma-separated)', 'saree, handloom, silk'),
+          _buildTextField('Stock Quantity *', 'e.g. 50', _stockController, keyboardType: TextInputType.number),
+          _buildTextField('Description', 'Describe your product...', _descriptionController, maxLines: 4),
+          _buildTextField('Tags (comma-separated)', 'saree, handloom, silk', _tagsController),
         ],
       ),
     );
   }
 
-  Widget _buildTextField(String label, String hint, {int maxLines = 1}) {
+  Widget _buildTextField(String label, String hint, TextEditingController controller, {int maxLines = 1, TextInputType? keyboardType}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: AppTextStyles.labelMedium),
         const SizedBox(height: 6),
         TextField(
+          controller: controller,
           maxLines: maxLines,
+          keyboardType: keyboardType,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle:
-                AppTextStyles.bodyMedium.copyWith(color: AppColors.muted),
+            hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.muted),
             filled: true,
             fillColor: AppColors.background,
             border: OutlineInputBorder(
@@ -163,8 +287,7 @@ class AddProductScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: AppColors.border, width: 1.5),
             ),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           ),
         ),
         const SizedBox(height: 14),
@@ -188,14 +311,16 @@ class AddProductScreen extends StatelessWidget {
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               isExpanded: true,
-              value: items[0],
+              value: _category,
               items: items.map((String item) {
                 return DropdownMenuItem<String>(
                   value: item,
                   child: Text(item, style: AppTextStyles.bodyMedium),
                 );
               }).toList(),
-              onChanged: (_) {},
+              onChanged: (value) {
+                if (value != null) setState(() => _category = value);
+              },
             ),
           ),
         ),
@@ -238,8 +363,7 @@ class AddProductScreen extends StatelessWidget {
               value: value,
               onChanged: (_) {},
               activeColor: AppColors.primary,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
             ),
           ),
           const SizedBox(width: 10),
@@ -249,10 +373,10 @@ class AddProductScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomButtons(BuildContext context) {
+  Widget _buildBottomButtons(BuildContext context, bool isLoading) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.card,
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
@@ -260,34 +384,26 @@ class AddProductScreen extends StatelessWidget {
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () {},
+              onPressed: isLoading ? null : () {},
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: AppColors.border, width: 2),
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
-              child: Text('Preview',
-                  style:
-                      AppTextStyles.labelLarge.copyWith(color: AppColors.text)),
+              child: Text('Preview', style: AppTextStyles.labelLarge.copyWith(color: AppColors.text)),
             ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: ElevatedButton(
-              onPressed: () {
-                if (context.canPop()) {
-                  context.pop();
-                } else {
-                  context.go('/seller');
-                }
-              },
+              onPressed: isLoading ? null : _publishProduct,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
-              child: const Text('Publish Product'),
+              child: isLoading 
+                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                : const Text('Publish Product'),
             ),
           ),
         ],

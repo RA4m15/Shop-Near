@@ -1,36 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/providers/repository_providers.dart';
+import '../../../shared/models/chat_message.dart';
 
-class ChatDetailScreen extends StatefulWidget {
+class ChatDetailScreen extends ConsumerStatefulWidget {
   final String name;
   const ChatDetailScreen({super.key, required this.name});
 
   @override
-  State<ChatDetailScreen> createState() => _ChatDetailScreenState();
+  ConsumerState<ChatDetailScreen> createState() => _ChatDetailScreenState();
 }
 
-class _ChatDetailScreenState extends State<ChatDetailScreen> {
+class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final List<Map<String, dynamic>> _messages = [
-    {'text': 'Hi, is this saree still available?', 'isMe': true},
-    {'text': 'Yes, it is! We have 2 more colors in stock.', 'isMe': false},
-    {'text': 'Can I see the red one?', 'isMe': true},
-    {'text': 'Sure, join our live session at 4 PM today for a full demo!', 'isMe': false},
-  ];
+  final List<ChatMessage> _messages = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Connect socket and listen for messages
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final socketService = ref.read(socketServiceProvider);
+      socketService.connect();
+      socketService.on('message', (data) {
+        if (data['sender'] == widget.name || data['receiver'] == widget.name) {
+          setState(() {
+            _messages.add(ChatMessage.fromMap(data));
+          });
+          _scrollToBottom();
+        }
+      });
+    });
+  }
 
   void _sendMessage() {
-    if (_messageController.text.trim().isEmpty) return;
+    final text = _messageController.text.trim();
+    if (text.isEmpty) return;
+    
+    final socketService = ref.read(socketServiceProvider);
+    final messageData = {
+      'receiver': widget.name,
+      'text': text,
+    };
+    
+    socketService.emit('message', messageData);
+    
+    // Optimistic UI update
     setState(() {
-      _messages.add({
-        'text': _messageController.text.trim(),
-        'isMe': true,
-      });
+      _messages.add(ChatMessage(
+        text: text,
+        sender: 'Me', // This will be replaced by actual sender from socket event
+        receiver: widget.name,
+        timestamp: DateTime.now(),
+        isMe: true,
+      ));
       _messageController.clear();
     });
     
+    _scrollToBottom();
+  }
+
+  void _scrollToBottom() {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -114,7 +148,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               itemCount: _messages.length,
               itemBuilder: (context, index) {
                 final msg = _messages[index];
-                return _buildChatBubble(msg['text'], msg['isMe']);
+                return _buildChatBubble(msg.text, msg.isMe);
               },
             ),
           ),

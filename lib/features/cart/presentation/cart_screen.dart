@@ -1,23 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/providers/cart_providers.dart';
+import '../../../shared/models/cart_item.dart';
 
-class CartScreen extends StatelessWidget {
+class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cartAsync = ref.watch(cartProvider);
+
     return Scaffold(
       appBar: AppBar(
-        title: RichText(
-          text: TextSpan(
-            text: 'My Cart ',
-            style: AppTextStyles.h3.copyWith(color: AppColors.text, fontSize: 18),
-            children: [
-              TextSpan(text: '(3)', style: AppTextStyles.labelMedium.copyWith(color: AppColors.muted, fontSize: 14)),
-            ],
+        title: cartAsync.when(
+          data: (cartItems) => RichText(
+            text: TextSpan(
+              text: 'My Cart ',
+              style: AppTextStyles.h3.copyWith(color: AppColors.text, fontSize: 18),
+              children: [
+                TextSpan(text: '(${cartItems.length})', style: AppTextStyles.labelMedium.copyWith(color: AppColors.muted, fontSize: 14)),
+              ],
+            ),
           ),
+          loading: () => const Text('Loading...'),
+          error: (_, __) => const Text('My Cart'),
         ),
         centerTitle: false,
         leading: IconButton(
@@ -39,121 +48,143 @@ class CartScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 24),
-        child: Column(
-          children: [
-            _buildCartItem('👗', 'Silk Saree Blue', 'Priya Fashion', '₹1,299', '1', const [Color(0xFFFFECD2), Color(0xFFFCB69F)]),
-            _buildCartItem('🌿', 'Organic Ghee 500g', 'Green Bazaar', '₹900 (×2)', '2', const [Color(0xFFA8EDEA), Color(0xFFFED6E3)]),
-            
-            // Promo Box
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  color: AppColors.background,
-                  border: Border.all(color: AppColors.border),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.local_offer, color: AppColors.primary, size: 18),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Enter promo code (try: LOCAL10)',
-                          hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.muted, fontSize: 13),
-                          border: InputBorder.none,
-                          isDense: true,
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                        style: AppTextStyles.labelSmall.copyWith(fontSize: 13),
-                      ),
+      body: cartAsync.when(
+        data: (cartItems) {
+          if (cartItems.isEmpty) {
+            return const Center(child: Text('Your cart is empty 🛒'));
+          }
+          
+          double subtotal = 0;
+          for (var item in cartItems) {
+            subtotal += item.price * item.quantity;
+          }
+          double total = subtotal - 220; // Example discount
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 24),
+            child: Column(
+              children: [
+                ...cartItems.map((item) => _buildCartItem(
+                  item.imagePlaceholder ?? '📦',
+                  item.productName,
+                  item.shopName,
+                  '₹${item.price}',
+                  item.quantity.toString(),
+                  const [Color(0xFFFFECD2), Color(0xFFFCB69F)],
+                )),
+                
+                // Promo Box
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: BorderRadius.circular(14),
                     ),
-                    Text('Apply', style: AppTextStyles.labelSmall.copyWith(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.w800)),
-                  ],
-                ),
-              ),
-            ),
-            
-            // Summary Box
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.card,
-                border: Border.all(color: AppColors.border),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Order Summary', style: AppTextStyles.labelLarge.copyWith(fontSize: 14, fontWeight: FontWeight.w800)),
-                  const SizedBox(height: 12),
-                  _buildSummaryRow('Subtotal (3 items)', '₹2,199', false),
-                  const SizedBox(height: 8),
-                  _buildSummaryRow('Delivery charge', 'FREE 🎉', true),
-                  const SizedBox(height: 8),
-                  _buildSummaryRow('Promo (LOCAL10)', '−₹220', true),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Divider(height: 1, color: AppColors.border),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.local_offer, color: AppColors.primary, size: 18),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Enter promo code (try: LOCAL10)',
+                              hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.muted, fontSize: 13),
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                            style: AppTextStyles.labelSmall.copyWith(fontSize: 13),
+                          ),
+                        ),
+                        Text('Apply', style: AppTextStyles.labelSmall.copyWith(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.w800)),
+                      ],
+                    ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                ),
+                
+                // Summary Box
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.card,
+                    border: Border.all(color: AppColors.border),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Total Payable', style: AppTextStyles.labelMedium.copyWith(fontSize: 14, fontWeight: FontWeight.w800)),
-                      Text('₹1,979', style: AppTextStyles.h2.copyWith(color: AppColors.primary, fontSize: 18, fontWeight: FontWeight.w900)),
+                      Text('Order Summary', style: AppTextStyles.labelLarge.copyWith(fontSize: 14, fontWeight: FontWeight.w800)),
+                      const SizedBox(height: 12),
+                      _buildSummaryRow('Subtotal (${cartItems.length} items)', '₹$subtotal', false),
+                      const SizedBox(height: 8),
+                      _buildSummaryRow('Delivery charge', 'FREE 🎉', true),
+                      const SizedBox(height: 8),
+                      _buildSummaryRow('Promo (LOCAL10)', '−₹220', true),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Divider(height: 1, color: AppColors.border),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Total Payable', style: AppTextStyles.labelMedium.copyWith(fontSize: 14, fontWeight: FontWeight.w800)),
+                          Text('₹$total', style: AppTextStyles.h2.copyWith(color: AppColors.primary, fontSize: 18, fontWeight: FontWeight.w900)),
+                        ],
+                      ),
                     ],
                   ),
-                ],
-              ),
-            ),
-            
-            // Payment Methods
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Select Payment Method', style: AppTextStyles.labelMedium.copyWith(fontSize: 13, fontWeight: FontWeight.w800)),
-                  const SizedBox(height: 12),
-                  Row(
+                ),
+                
+                // Payment Methods
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: _buildPaymentMethod('📱', 'UPI', true)),
-                      const SizedBox(width: 8),
-                      Expanded(child: _buildPaymentMethod('💳', 'Card', false)),
-                      const SizedBox(width: 8),
-                      Expanded(child: _buildPaymentMethod('💵', 'COD', false)),
-                      const SizedBox(width: 8),
-                      Expanded(child: _buildPaymentMethod('🏦', 'Netbank', false)),
+                      Text('Select Payment Method', style: AppTextStyles.labelMedium.copyWith(fontSize: 13, fontWeight: FontWeight.w800)),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(child: _buildPaymentMethod('📱', 'UPI', true)),
+                          const SizedBox(width: 8),
+                          Expanded(child: _buildPaymentMethod('💳', 'Card', false)),
+                          const SizedBox(width: 8),
+                          Expanded(child: _buildPaymentMethod('💵', 'COD', false)),
+                          const SizedBox(width: 8),
+                          Expanded(child: _buildPaymentMethod('🏦', 'Netbank', false)),
+                        ],
+                      ),
                     ],
                   ),
-                ],
-              ),
-            ),
-            
-            // Place Order Button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => context.push('/home/order-track'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                    elevation: 0,
-                  ),
-                  child: Text('Place Order · ₹1,979 →', style: AppTextStyles.labelMedium.copyWith(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800)),
                 ),
-              ),
+                
+                // Place Order Button
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => context.push('/home/order-track'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        elevation: 0,
+                      ),
+                      child: Text('Place Order · ₹$total →', style: AppTextStyles.labelMedium.copyWith(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800)),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err')),
       ),
     );
   }

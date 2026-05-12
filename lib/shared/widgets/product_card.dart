@@ -41,10 +41,18 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
                     alignment: Alignment.center,
-                    // TODO: replace with CachedNetworkImage
                     child: Hero(
                       tag: 'product_img_${product.id}',
-                      child: Text(product.imagePlaceholder, style: const TextStyle(fontSize: 46)),
+                      child: product.imagePlaceholder.startsWith('http')
+                        ? Image.network(
+                            product.imagePlaceholder,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            errorBuilder: (context, error, stackTrace) => 
+                              const Icon(Icons.broken_image, size: 40, color: Colors.white54),
+                          )
+                        : Text(product.imagePlaceholder, style: const TextStyle(fontSize: 46)),
                     ),
                   ),
                   Positioned(

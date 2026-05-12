@@ -1,17 +1,22 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/providers/seller_providers.dart';
+import '../../../shared/models/product.dart';
 
-class SellerProductsScreen extends StatefulWidget {
+import 'package:go_router/go_router.dart';
+
+class SellerProductsScreen extends ConsumerStatefulWidget {
   const SellerProductsScreen({super.key});
 
   @override
-  State<SellerProductsScreen> createState() => _SellerProductsScreenState();
+  ConsumerState<SellerProductsScreen> createState() => _SellerProductsScreenState();
 }
 
-class _SellerProductsScreenState extends State<SellerProductsScreen> with SingleTickerProviderStateMixin {
+class _SellerProductsScreenState extends ConsumerState<SellerProductsScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -28,6 +33,8 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> with Single
 
   @override
   Widget build(BuildContext context) {
+    final productsAsync = ref.watch(sellerProductsProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('My Products', style: AppTextStyles.h3),
@@ -95,58 +102,37 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> with Single
           ),
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildProductList(),
-          _buildProductList(), // Placeholders for other tabs
-          _buildProductList(),
-          _buildProductList(),
-        ],
+      body: productsAsync.when(
+        data: (products) {
+          return TabBarView(
+            controller: _tabController,
+            children: [
+              _buildProductList(products),
+              _buildProductList(products), // In real app, filter these
+              _buildProductList(products),
+              _buildProductList(products),
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err')),
       ),
     );
   }
 
-  Widget _buildProductList() {
-    List<Widget> products = [
-      _buildProductItem('👗', 'Silk Banarasi Saree — Blue', 'Stock: 14 · ⭐ 4.8 (234)', '₹1,299'),
-      _buildProductItem('👘', 'Cotton Kurti Set — Floral', 'Stock: 28 · ⭐ 4.6 (108)', '₹699'),
-      _buildProductItem('🧣', 'Banarasi Dupatta — Gold', 'Stock: 8 · ⭐ 4.9 (67)', '₹850'),
-      _buildProductItem('🎀', 'Designer Lehenga — Draft', 'Not published yet', '₹3,200', isDraft: true),
-      _buildProductItem('🥻', 'Chanderi Saree — Pink', 'Stock: 5 · ⭐ 4.7 (42)', '₹1,099'),
-      _buildProductItem('🧶', 'Woolen Shawl — Kashida', '⚠ Out of Stock', '₹1,800', isOutOfStock: true),
-    ];
-
-    // Simple filtering logic for demonstration
-    if (_tabController.index == 1) { // Active
-      products = products.where((w) {
-        final p = w as GestureDetector;
-        final container = p.child as Container;
-        // This is a bit hacky since we are using static widgets, 
-        // in a real app we would filter the data list first.
-        return !p.toString().contains('Draft') && !p.toString().contains('Out of Stock');
-      }).toList();
-      // Since the above hacky filter might not work well with wrapped widgets, 
-      // let's just manually define lists for this mockup.
-      products = [
-        _buildProductItem('👗', 'Silk Banarasi Saree — Blue', 'Stock: 14 · ⭐ 4.8 (234)', '₹1,299'),
-        _buildProductItem('👘', 'Cotton Kurti Set — Floral', 'Stock: 28 · ⭐ 4.6 (108)', '₹699'),
-        _buildProductItem('🧣', 'Banarasi Dupatta — Gold', 'Stock: 8 · ⭐ 4.9 (67)', '₹850'),
-        _buildProductItem('🥻', 'Chanderi Saree — Pink', 'Stock: 5 · ⭐ 4.7 (42)', '₹1,099'),
-      ];
-    } else if (_tabController.index == 2) { // Draft
-      products = [
-        _buildProductItem('🎀', 'Designer Lehenga — Draft', 'Not published yet', '₹3,200', isDraft: true),
-      ];
-    } else if (_tabController.index == 3) { // Out of Stock
-      products = [
-        _buildProductItem('🧶', 'Woolen Shawl — Kashida', '⚠ Out of Stock', '₹1,800', isOutOfStock: true),
-      ];
-    }
-
-    return ListView(
+  Widget _buildProductList(List<Product> products) {
+    return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      children: products,
+      itemCount: products.length,
+      itemBuilder: (context, index) {
+        final product = products[index];
+        return _buildProductItem(
+          product.imagePlaceholder ?? '📦',
+          product.name,
+          'Stock: ${product.soldCount} · ⭐ ${product.rating}',
+          '₹${product.price}',
+        );
+      },
     );
   }
 
@@ -176,7 +162,19 @@ class _SellerProductsScreenState extends State<SellerProductsScreen> with Single
                   borderRadius: BorderRadius.circular(12),
                 ),
                 alignment: Alignment.center,
-                child: Text(icon, style: const TextStyle(fontSize: 28, decoration: TextDecoration.none)),
+                child: icon.startsWith('http')
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        icon,
+                        width: 56,
+                        height: 56,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => 
+                          const Icon(Icons.broken_image, size: 24, color: Colors.white54),
+                      ),
+                    )
+                  : Text(icon, style: const TextStyle(fontSize: 28, decoration: TextDecoration.none)),
               ),
             ),
             const SizedBox(width: 12),
