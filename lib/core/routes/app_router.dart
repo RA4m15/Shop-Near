@@ -12,11 +12,7 @@ import '../../features/cart/presentation/cart_screen.dart';
 import '../../features/chat/presentation/chat_list_screen.dart';
 import '../../features/chat/presentation/chat_detail_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
-<<<<<<< HEAD
 import '../../features/profile/presentation/profile_edit_screen.dart';
-=======
-import '../../features/profile/presentation/edit_profile_screen.dart';
->>>>>>> 156ccf516472535c56e5e4a5f6e50a942847eeb6
 import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/order_tracking/presentation/order_tracking_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
@@ -102,11 +98,6 @@ class AppRouter {
         path: '/home/settings',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const SettingsScreen(),
-      ),
-      GoRoute(
-        path: '/home/profile/edit',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const EditProfileScreen(),
       ),
       GoRoute(
         path: '/home/discover/:category',
