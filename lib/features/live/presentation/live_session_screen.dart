@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shop_near/shared/providers/repository_providers.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../shared/widgets/live_badge.dart';
@@ -25,6 +26,16 @@ class _LiveSessionScreenState extends ConsumerState<LiveSessionScreen> with Tick
   bool _localUserJoined = false;
   bool _isJoined = false;
   int? _remoteUid;
+  final List<Widget> _floatingHearts = [];
+  final math.Random _random = math.Random();
+  final TextEditingController _chatController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final List<Map<String, dynamic>> _chatMessages = [
+    {'user': 'Anjali', 'msg': 'Love this collection! 😍'},
+    {'user': 'Rohit K', 'msg': 'What\'s the price for blue one?'},
+    {'user': 'Priya', 'msg': '₹1,299 only! Limited stock!', 'isSeller': true},
+    {'user': 'Meena', 'msg': 'Can I get COD option? 🙏'},
+  ];
   @override
   void initState() {
     super.initState();
