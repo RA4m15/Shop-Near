@@ -171,15 +171,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                         ),
                         const SizedBox(width: 10),
                         Expanded(
-                          child: OutlinedButton.icon(
+                          child: ElevatedButton.icon(
                             onPressed: () => context.go('/seller'),
-                            icon: Icon(Icons.storefront, size: 16, color: Theme.of(context).colorScheme.onSurface),
-                            label: Text('Seller Mode', style: AppTextStyles.labelMedium.copyWith(color: Theme.of(context).colorScheme.onSurface, fontSize: 13, fontWeight: FontWeight.w800)),
-                            style: OutlinedButton.styleFrom(
+                            icon: const Icon(Icons.storefront, size: 16, color: Colors.white),
+                            label: Text('Seller Mode', style: AppTextStyles.labelMedium.copyWith(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w800)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF764ba2),
                               padding: const EdgeInsets.symmetric(vertical: 12),
-                              side: const BorderSide(color: AppColors.border, width: 1.5),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                              backgroundColor: AppColors.card,
+                              elevation: 3, shadowColor: const Color(0xFF764ba2).withOpacity(0.3),
                             ),
                           ),
                         ),
@@ -341,9 +341,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     return GestureDetector(
       onTap: tabIndex != null ? () => setState(() => _activeTabIndex = tabIndex) : null,
       child: Column(children: [
-        Text(val, style: AppTextStyles.h3.copyWith(fontSize: 19, fontWeight: FontWeight.w900, color: Theme.of(context).colorScheme.onSurface)),
+        Text(val, style: AppTextStyles.h3.copyWith(fontSize: 19, fontWeight: FontWeight.w900, color: AppColors.text)),
         const SizedBox(height: 2),
-        Text(lbl, style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted, fontSize: 11)),
+        Text(lbl, style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted, fontSize: 11, fontWeight: FontWeight.w700)),
       ]),
     );
   }
