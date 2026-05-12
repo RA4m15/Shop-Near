@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../shared/providers/product_providers.dart';
+import '../../../shared/providers/seller_providers.dart';
 
 class AddProductScreen extends ConsumerStatefulWidget {
   const AddProductScreen({super.key});
@@ -80,6 +81,9 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
 
       // Use the unified productsProvider to create the product
       await ref.read(productsProvider.notifier).createProduct(productData, imagePaths);
+      
+      // Refresh the seller's product list
+      ref.invalidate(sellerProductsProvider);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
