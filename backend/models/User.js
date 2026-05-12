@@ -10,9 +10,18 @@ const userSchema = new mongoose.Schema({
   handle: { type: String, default: '' },
   location: { type: String, default: '' },
   bio: { type: String, default: '' },
+  phone: { type: String, default: '' },
   isVerified: { type: Boolean, default: false },
   followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  settings: {
+    liveSessionAlerts: { type: Boolean, default: true },
+    orderUpdates: { type: Boolean, default: true },
+    offersDeals: { type: Boolean, default: true },
+    chatMessages: { type: Boolean, default: false },
+    biometricLogin: { type: Boolean, default: true },
+    publicProfile: { type: Boolean, default: true },
+  },
   createdAt: { type: Date, default: Date.now }
 });
 
