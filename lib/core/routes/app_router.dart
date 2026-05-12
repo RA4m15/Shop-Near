@@ -146,7 +146,6 @@ class AppRouter {
             routes: [
               GoRoute(
                 path: 'edit',
-                parentNavigatorKey: _rootNavigatorKey,
                 builder: (context, state) => const ProfileEditScreen(),
               ),
             ],

@@ -19,7 +19,8 @@ class SellerDashboardScreen extends ConsumerStatefulWidget {
   ConsumerState<SellerDashboardScreen> createState() => _SellerDashboardScreenState();
 }
 
-class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen> with SingleTickerProviderStateMixin {
+class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _livePulseController;
 
   @override
@@ -129,7 +130,10 @@ class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen> w
                   const SizedBox(height: 4),
                   Text(
                     user?.name ?? 'Seller',
-                    style: AppTextStyles.h1.copyWith(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900),
+                    style: AppTextStyles.h1.copyWith(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900),
                   ),
                 ],
               ),

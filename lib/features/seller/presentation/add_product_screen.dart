@@ -99,6 +99,20 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
           onPressed: () => context.canPop() ? context.pop() : context.go('/seller'),
         ),
         title: Text('Add Product', style: AppTextStyles.h3),
+        actions: [
+          TextButton(
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Draft saved successfully! 💾')),
+              );
+            },
+            child: Text(
+              'Save Draft',
+              style: AppTextStyles.labelMedium.copyWith(color: AppColors.primary),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
