@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../auth/providers/auth_notifier.dart';
+import '../../../shared/providers/user_providers.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userAsync = ref.watch(userProfileProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Settings', style: AppTextStyles.h3.copyWith(fontSize: 18)),
@@ -27,34 +32,41 @@ class SettingsScreen extends StatelessWidget {
         child: Column(
           children: [
             // Profile Row
-            Container(
-              padding: const EdgeInsets.all(16),
-              color: AppColors.card,
-              child: Row(
-                children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(colors: [Color(0xFFf093fb), Color(0xFFf5576c)]),
+            userAsync.when(
+              data: (user) => Container(
+                padding: const EdgeInsets.all(16),
+                color: AppColors.card,
+                child: Row(
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(colors: [Color(0xFFf093fb), Color(0xFFf5576c)]),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        (user.avatar ?? '').isNotEmpty ? user.avatar![0].toUpperCase() : '😊', 
+                        style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold)
+                      ),
                     ),
-                    alignment: Alignment.center,
-                    child: const Text('😊', style: TextStyle(fontSize: 28)),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Anjali Sharma', style: AppTextStyles.labelLarge.copyWith(fontSize: 15, fontWeight: FontWeight.w900)),
-                        Text('@anjali_buys · Silver Member', style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted, fontSize: 12)),
-                      ],
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(user.name, style: AppTextStyles.labelLarge.copyWith(fontSize: 15, fontWeight: FontWeight.w900)),
+                          Text('${user.handle ?? "@user"} · Silver Member', style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted, fontSize: 12)),
+                        ],
+                      ),
                     ),
-                  ),
-                  const Icon(Icons.chevron_right, color: AppColors.muted),
-                ],
+                    const Icon(Icons.chevron_right, color: AppColors.muted),
+                  ],
+                ),
               ),
+              loading: () => const SizedBox(height: 80, child: Center(child: CircularProgressIndicator())),
+              error: (err, stack) => const SizedBox(),
             ),
             const SizedBox(height: 8),
 
@@ -87,11 +99,11 @@ class SettingsScreen extends StatelessWidget {
             _buildSection('SUPPORT', [
               _buildSettingsItem(context, Icons.headset_mic, const Color(0xFFEFF6FF), AppColors.secondary, 'Help & Support', 'FAQs, contact us', true),
               _buildSettingsItem(context, Icons.star_outline, const Color(0xFFFFF9EC), AppColors.accent, 'Rate the App', 'Share your feedback', true),
-              _buildLogoutItem(context),
+              _buildLogoutItem(context, ref),
             ]),
 
             const SizedBox(height: 16),
-            Text('BazarLive v2.4.1 · Made with ❤️ for Local India', textAlign: TextAlign.center, style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted, fontSize: 11, fontWeight: FontWeight.w700)),
+            Text('ShopNear v2.5.0 · Made with ❤️ for Local India', textAlign: TextAlign.center, style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted, fontSize: 11, fontWeight: FontWeight.w700)),
             const SizedBox(height: 20),
           ],
         ),
@@ -204,9 +216,14 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLogoutItem(BuildContext context) {
+  Widget _buildLogoutItem(BuildContext context, WidgetRef ref) {
     return GestureDetector(
-      onTap: () => context.go('/'),
+      onTap: () async {
+        await ref.read(authControllerProvider.notifier).logout();
+        if (context.mounted) {
+          context.go('/');
+        }
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
@@ -224,7 +241,7 @@ class SettingsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Log Out', style: AppTextStyles.labelMedium.copyWith(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.primary)),
-                  Text('anjali_buys@gmail.com', style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted, fontSize: 11)),
+                  Text('End your session', style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted, fontSize: 11)),
                 ],
               ),
             ),
