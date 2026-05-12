@@ -5,14 +5,21 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../shared/widgets/section_header.dart';
 
-class SellerDashboardScreen extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../shared/providers/order_providers.dart';
+import '../../../shared/providers/user_providers.dart';
+import '../../../shared/providers/repository_providers.dart';
+import '../../../shared/models/order.dart';
+import '../../../shared/models/user.dart';
+
+class SellerDashboardScreen extends ConsumerStatefulWidget {
   const SellerDashboardScreen({super.key});
 
   @override
-  State<SellerDashboardScreen> createState() => _SellerDashboardScreenState();
+  ConsumerState<SellerDashboardScreen> createState() => _SellerDashboardScreenState();
 }
 
-class _SellerDashboardScreenState extends State<SellerDashboardScreen> with SingleTickerProviderStateMixin {
+class _SellerDashboardScreenState extends ConsumerState<SellerDashboardScreen> with SingleTickerProviderStateMixin {
   late AnimationController _livePulseController;
 
   @override
@@ -22,6 +29,15 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     )..repeat(reverse: true);
+
+    // Connect socket and listen for orders
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final socketService = ref.read(socketServiceProvider);
+      socketService.connect();
+      socketService.on('newOrder', (data) {
+        ref.invalidate(sellerOrdersProvider);
+      });
+    });
   }
 
   @override
@@ -32,11 +48,17 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
 
   @override
   Widget build(BuildContext context) {
+    final userAsync = ref.watch(userProfileProvider);
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _buildHeader(context),
+            userAsync.when(
+              data: (user) => _buildHeader(context, user),
+              loading: () => const SizedBox(height: 220, child: Center(child: CircularProgressIndicator())),
+              error: (err, stack) => _buildHeader(context, null),
+            ),
             _buildStatsGrid(context),
             const SectionHeader(
               title: '📊 Weekly Revenue',
@@ -60,7 +82,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, User? user) {
     return Stack(
       children: [
         Container(
@@ -106,7 +128,7 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Priya Fashion',
+                    user?.name ?? 'Seller',
                     style: AppTextStyles.h1.copyWith(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900),
                   ),
                 ],
@@ -343,15 +365,56 @@ class _SellerDashboardScreenState extends State<SellerDashboardScreen> with Sing
   }
 
   Widget _buildRecentOrders(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        children: [
-          _buildOrderItem(context, '👗', 'Silk Saree Blue', 'Anjali S. · ₹1,299', 'Pending', const Color(0xFFFEF3C7), Color(0xFF92400E)),
-          _buildOrderItem(context, '👗', 'Banarasi Dupatta', 'Meena R. · ₹850', 'Packing', const Color(0xFFDBEAFE), Color(0xFF1E40AF)),
-          _buildOrderItem(context, '👗', 'Cotton Kurti Set', 'Kavita D. · ₹699', 'Delivered', const Color(0xFFDCFCE7), Color(0xFF166534)),
-        ],
-      ),
+    final ordersAsync = ref.watch(sellerOrdersProvider);
+
+    return ordersAsync.when(
+      data: (orders) {
+        if (orders.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            child: Text('No orders yet'),
+          );
+        }
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            children: orders.take(3).map((order) {
+              Color statusBg;
+              Color statusText;
+              
+              switch (order.status) {
+                case 'Pending':
+                  statusBg = const Color(0xFFFEF3C7);
+                  statusText = const Color(0xFF92400E);
+                  break;
+                case 'Packing':
+                  statusBg = const Color(0xFFDBEAFE);
+                  statusText = const Color(0xFF1E40AF);
+                  break;
+                case 'Delivered':
+                  statusBg = const Color(0xFFDCFCE7);
+                  statusText = const Color(0xFF166534);
+                  break;
+                default:
+                  statusBg = AppColors.border;
+                  statusText = AppColors.text;
+              }
+
+              return _buildOrderItem(
+                context,
+                order.productPlaceholder,
+                order.productName,
+                '${order.buyerName} · ₹${order.amount.toInt()}',
+                order.status,
+                statusBg,
+                statusText,
+              );
+            }).toList(),
+          ),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(child: Text('Error: $err')),
     );
   }
 

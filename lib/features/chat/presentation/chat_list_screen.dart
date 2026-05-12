@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/providers/chat_providers.dart';
+import '../../../shared/models/chat_preview.dart';
 
-class ChatListScreen extends StatefulWidget {
+class ChatListScreen extends ConsumerStatefulWidget {
   const ChatListScreen({super.key});
 
   @override
-  State<ChatListScreen> createState() => _ChatListScreenState();
+  ConsumerState<ChatListScreen> createState() => _ChatListScreenState();
 }
 
-class _ChatListScreenState extends State<ChatListScreen> {
+class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   int _activeTabIndex = 0;
   final List<String> _tabs = ['All', 'Buyers', 'Sellers', 'Groups'];
 
@@ -22,7 +25,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
         centerTitle: false,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.text, size: 20),
-          onPressed: () => context.go('/home'),
+          onPressed: () => context.pop(),
         ),
         actions: [
           IconButton(
@@ -59,64 +62,33 @@ class _ChatListScreenState extends State<ChatListScreen> {
   }
 
   Widget _buildChatList() {
-    // Simulated filtering
-    if (_activeTabIndex == 3) { // Groups
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('👥', style: TextStyle(fontSize: 48)),
-            const SizedBox(height: 12),
-            Text('No community groups yet', style: AppTextStyles.labelMedium.copyWith(color: AppColors.muted)),
-          ],
-        ),
-      );
-    }
+    final chatListAsync = ref.watch(chatListProvider);
 
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      children: [
-        _buildChatItem(
-          context,
-          emoji: '👗',
-          gradient: const [Color(0xFFFFECD2), Color(0xFFFCB69F)],
-          name: 'Priya Fashion',
-          preview: 'Your order is ready for dispatch! 📦',
-          time: '2m',
-          online: true,
-          unread: 3,
-        ),
-        _buildChatItem(
-          context,
-          emoji: '🌿',
-          gradient: const [Color(0xFFA8EDEA), Color(0xFFFED6E3)],
-          name: 'Green Bazaar',
-          preview: 'COD available for your area ✅',
-          time: '1h',
-          online: false,
-          unread: 0,
-        ),
-        _buildChatItem(
-          context,
-          emoji: '🎨',
-          gradient: const [Color(0xFFD4FC79), Color(0xFF96E6A1)],
-          name: 'CraftHub MP',
-          preview: 'Customization possible! DM for details',
-          time: '3h',
-          online: true,
-          unread: 1,
-        ),
-        _buildChatItem(
-          context,
-          emoji: '💍',
-          gradient: const [Color(0xFFF7797D), Color(0xFFFBD786)],
-          name: 'Silver Art MP',
-          preview: 'Thank you for your purchase! 🙏',
-          time: '1d',
-          online: false,
-          unread: 0,
-        ),
-      ],
+    return chatListAsync.when(
+      data: (chats) {
+        if (chats.isEmpty) {
+          return const Center(child: Text('No conversations yet'));
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: chats.length,
+          itemBuilder: (context, index) {
+            final chat = chats[index];
+            return _buildChatItem(
+              context,
+              emoji: chat.emoji,
+              gradient: const [Color(0xFFFFECD2), Color(0xFFFCB69F)],
+              name: chat.name,
+              preview: chat.lastMessage,
+              time: chat.time,
+              online: chat.isOnline,
+              unread: chat.unreadCount,
+            );
+          },
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(child: Text('Error: $err')),
     );
   }
 

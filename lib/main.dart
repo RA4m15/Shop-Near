@@ -5,7 +5,7 @@ import 'app.dart';
 void main() {
   runApp(
     const ProviderScope(
-      child: BazarLiveApp(),
+      child: ShopNearApp(),
     ),
   );
 }

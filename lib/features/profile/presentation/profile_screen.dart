@@ -1,27 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/providers/user_providers.dart';
+import '../../../shared/models/user.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   int _activeTabIndex = 0;
   final List<String> _tabs = ['Wishlist', 'Orders', 'Reviews', 'Badges'];
 
   @override
   Widget build(BuildContext context) {
+    final userAsync = ref.watch(userProfileProvider);
+
     return Scaffold(
       extendBodyBehindAppBar: true,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 30),
-        child: Column(
-          children: [
+      body: userAsync.when(
+        data: (user) => _buildProfileBody(user),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err')),
+      ),
+    );
+  }
+
+  Widget _buildProfileBody(User user) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.only(bottom: 30),
+      child: Column(
+        children: [
             // Profile Cover
             SizedBox(
               height: 200,
@@ -61,15 +76,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     right: 0,
                     child: Center(
                       child: Container(
-                        width: 80,
-                        height: 80,
+                        width: 90,
+                        height: 90,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 4),
-                          gradient: const LinearGradient(colors: [Color(0xFFf093fb), Color(0xFFf5576c)]),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
                         ),
-                        alignment: Alignment.center,
-                        child: const Text('😊', style: TextStyle(fontSize: 40)),
+                        child: ClipOval(
+                          child: (user.avatar ?? '').isNotEmpty
+                              ? CachedNetworkImage(
+                                  imageUrl: user.avatar!,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => const CircularProgressIndicator(),
+                                  errorWidget: (context, url, error) => const Icon(Icons.person, size: 50),
+                                )
+                              : Container(
+                                  color: AppColors.primary.withOpacity(0.1),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    user.name[0].toUpperCase(),
+                                    style: AppTextStyles.h1.copyWith(color: AppColors.primary),
+                                  ),
+                                ),
+                        ),
                       ),
                     ),
                   ),
@@ -82,16 +118,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
-                  Text('Anjali Sharma', style: AppTextStyles.h2.copyWith(fontSize: 20, fontWeight: FontWeight.w900)),
+                  Text(user.name, style: AppTextStyles.h2.copyWith(fontSize: 22, fontWeight: FontWeight.w900)),
                   const SizedBox(height: 4),
-                  Text('@anjali_buys · Indore, MP', style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted, fontSize: 12)),
-                  const SizedBox(height: 8),
+                  Text('${user.handle ?? "@${user.name.replaceAll(" ", "_").toLowerCase()}"} · ${user.location ?? "Indore, MP"}', style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted, fontSize: 13, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 12),
                   Text(
-                    'Local shopping enthusiast 🛍️ Supporting local sellers of MP ❤️ Trust local, buy local!',
+                    user.bio ?? 'Local shopping enthusiast 🛍️ Supporting local sellers!',
                     textAlign: TextAlign.center,
-                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.text, fontSize: 13, height: 1.5),
+                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.text, fontSize: 14, height: 1.5),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -102,36 +138,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildStat('34', 'Reviews', 2),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                   Row(
                     children: [
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Edit Profile coming soon! ✏️')),
-                            );
-                          },
+                          onPressed: () => context.push('/home/profile/edit'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.secondary,
-                            padding: const EdgeInsets.symmetric(vertical: 11),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            backgroundColor: AppColors.primary,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             elevation: 0,
                           ),
-                          child: Text('Edit Profile', style: AppTextStyles.labelMedium.copyWith(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w800)),
+                          child: Text('Edit Profile', style: AppTextStyles.labelMedium.copyWith(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w800)),
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () => context.go('/seller'),
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 11),
-                            side: const BorderSide(color: AppColors.border, width: 1.5),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            side: const BorderSide(color: AppColors.border, width: 2),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             backgroundColor: AppColors.background,
                           ),
-                          child: Text('Seller Mode', style: AppTextStyles.labelMedium.copyWith(fontSize: 13, fontWeight: FontWeight.w800)),
+                          child: Text('Seller Mode', style: AppTextStyles.labelMedium.copyWith(fontSize: 14, fontWeight: FontWeight.w800)),
                         ),
                       ),
                     ],
@@ -216,8 +248,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             // Tab Content
             _buildTabContent(),
-          ],
-        ),
+        ],
       ),
     );
   }

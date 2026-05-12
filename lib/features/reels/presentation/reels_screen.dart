@@ -1,62 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/providers/reel_providers.dart';
+import '../../../shared/models/reel.dart';
 
-class ReelsScreen extends StatefulWidget {
+class ReelsScreen extends ConsumerStatefulWidget {
   const ReelsScreen({super.key});
 
   @override
-  State<ReelsScreen> createState() => _ReelsScreenState();
+  ConsumerState<ReelsScreen> createState() => _ReelsScreenState();
 }
 
-class _ReelsScreenState extends State<ReelsScreen> {
+class _ReelsScreenState extends ConsumerState<ReelsScreen> {
   final PageController _pageController = PageController();
-
-  final List<Map<String, dynamic>> _reels = [
-    {
-      'seller': 'Priya Fashion',
-      'desc': 'Authentic Chanderi Saree demo! Check the gold zari work. 😍 #Handloom #Saree',
-      'likes': '2.4k',
-      'comments': '156',
-      'emoji': '👗',
-      'color': const Color(0xFF2B1B54),
-    },
-    {
-      'seller': 'Indore Handcrafts',
-      'desc': 'New wooden home decor collection. Hand-carved by local artisans. #Decor #Art',
-      'likes': '1.1k',
-      'comments': '42',
-      'emoji': '🪵',
-      'color': const Color(0xFF1B4D54),
-    },
-    {
-      'seller': 'Ethnic Wear',
-      'desc': 'Bridal Lehenga collection 2024. Pre-order now! 💍 #Wedding #Lehenga',
-      'likes': '5.2k',
-      'comments': '890',
-      'emoji': '👘',
-      'color': const Color(0xFF541B2B),
-    },
-  ];
 
   @override
   Widget build(BuildContext context) {
+    final reelsAsync = ref.watch(reelsProvider);
+
     return Scaffold(
       backgroundColor: Colors.black,
-      body: PageView.builder(
-        controller: _pageController,
-        scrollDirection: Axis.vertical,
-        itemCount: _reels.length,
-        itemBuilder: (context, index) {
-          final reel = _reels[index];
-          return _buildReelItem(reel);
-        },
+      body: reelsAsync.when(
+        data: (reels) => PageView.builder(
+          controller: _pageController,
+          scrollDirection: Axis.vertical,
+          itemCount: reels.length,
+          itemBuilder: (context, index) {
+            final reel = reels[index];
+            return _buildReelItem(reel);
+          },
+        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err', style: const TextStyle(color: Colors.white))),
       ),
     );
   }
 
-  Widget _buildReelItem(Map<String, dynamic> reel) {
+  Widget _buildReelItem(Reel reel) {
     return Stack(
       children: [
         // Video Placeholder
@@ -65,13 +47,13 @@ class _ReelsScreenState extends State<ReelsScreen> {
           height: double.infinity,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [reel['color'], reel['color'].withOpacity(0.5)],
+              colors: [const Color(0xFF2B1B54), const Color(0xFF1A1D2E)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
           ),
           alignment: Alignment.center,
-          child: Text(reel['emoji'], style: const TextStyle(fontSize: 140)),
+          child: Text(reel.emoji ?? '🎬', style: const TextStyle(fontSize: 140)),
         ),
         
         // Dark Overlay at Bottom
@@ -94,14 +76,14 @@ class _ReelsScreenState extends State<ReelsScreen> {
           bottom: 120,
           child: Column(
             children: [
-              _buildReelAction(Icons.favorite, reel['likes'], Colors.redAccent),
+              _buildReelAction(Icons.favorite, reel.likes.toString(), Colors.redAccent),
               const SizedBox(height: 20),
-              _buildReelAction(Icons.chat_bubble, reel['comments'], Colors.white),
+              _buildReelAction(Icons.chat_bubble, reel.comments.toString(), Colors.white),
               const SizedBox(height: 20),
               _buildReelAction(Icons.share, 'Share', Colors.white),
               const SizedBox(height: 20),
               GestureDetector(
-                onTap: () => context.push('/home/product/1'),
+                onTap: () => context.push('/home/product/${reel.sellerId}'),
                 child: Container(
                   width: 46,
                   height: 46,
@@ -127,9 +109,9 @@ class _ReelsScreenState extends State<ReelsScreen> {
             children: [
               Row(
                 children: [
-                  const CircleAvatar(radius: 18, backgroundColor: Colors.white, child: Text('👗')),
+                  CircleAvatar(radius: 18, backgroundColor: Colors.white, child: Text(reel.emoji ?? '👤')),
                   const SizedBox(width: 10),
-                  Text(reel['seller'], style: AppTextStyles.labelLarge.copyWith(color: Colors.white, fontWeight: FontWeight.w900)),
+                  Text(reel.sellerName, style: AppTextStyles.labelLarge.copyWith(color: Colors.white, fontWeight: FontWeight.w900)),
                   const SizedBox(width: 10),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -140,7 +122,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                reel['desc'],
+                reel.description,
                 style: AppTextStyles.bodyMedium.copyWith(color: Colors.white, fontSize: 13, height: 1.4),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,

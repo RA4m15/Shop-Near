@@ -28,4 +28,22 @@ class Seller {
     this.isVerified = false,
     this.isLive = false,
   });
+
+  factory Seller.fromMap(Map<String, dynamic> map) {
+    return Seller(
+      id: map['_id'] ?? map['id'] ?? '',
+      name: map['name'] ?? '',
+      handle: map['handle'] ?? '@${(map['name'] ?? '').toString().toLowerCase().replaceAll(' ', '')}',
+      location: map['location'] ?? 'Near You',
+      avatarPlaceholder: map['avatarPlaceholder'] ?? '👤',
+      rating: (map['rating'] ?? 0).toDouble(),
+      followersCount: map['followersCount'] ?? 0,
+      productsCount: map['productsCount'] ?? 0,
+      salesCount: map['salesCount'] ?? 0,
+      reviewsCount: map['reviewsCount'] ?? 0,
+      bio: map['bio'] ?? '',
+      isVerified: map['isVerified'] ?? false,
+      isLive: map['isLive'] ?? false,
+    );
+  }
 }

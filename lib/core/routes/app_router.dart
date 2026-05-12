@@ -12,6 +12,7 @@ import '../../features/cart/presentation/cart_screen.dart';
 import '../../features/chat/presentation/chat_list_screen.dart';
 import '../../features/chat/presentation/chat_detail_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
+import '../../features/profile/presentation/profile_edit_screen.dart';
 import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/order_tracking/presentation/order_tracking_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
@@ -24,6 +25,8 @@ import '../../features/seller/presentation/add_product_screen.dart';
 import '../../features/seller/presentation/go_live_setup_screen.dart';
 import '../../features/reels/presentation/post_reel_screen.dart';
 import '../../features/reels/presentation/reels_screen.dart';
+import '../../features/auth/presentation/login_screen.dart';
+import '../../features/auth/presentation/register_screen.dart';
 
 import '../../shared/widgets/app_bottom_nav.dart';
 import '../../shared/widgets/seller_bottom_nav.dart';
@@ -41,6 +44,14 @@ class AppRouter {
         path: '/',
         builder: (context, state) => const OnboardingScreen(),
       ),
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/register',
+        builder: (context, state) => const RegisterScreen(),
+      ),
       // Live session is full screen, so outside the shell
       GoRoute(
         path: '/home/live',
@@ -50,7 +61,9 @@ class AppRouter {
       GoRoute(
         path: '/home/product/:id',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const ProductDetailScreen(),
+        builder: (context, state) => ProductDetailScreen(
+          productId: state.pathParameters['id'],
+        ),
       ),
       GoRoute(
         path: '/home/shop/:id',
@@ -70,12 +83,16 @@ class AppRouter {
       GoRoute(
         path: '/home/order-track',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const OrderTrackingScreen(),
+        builder: (context, state) => OrderTrackingScreen(
+          orderId: state.uri.queryParameters['orderId'],
+        ),
       ),
       GoRoute(
         path: '/home/profile/orders/:id',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const OrderTrackingScreen(),
+        builder: (context, state) => OrderTrackingScreen(
+          orderId: state.pathParameters['id'],
+        ),
       ),
       GoRoute(
         path: '/home/settings',
@@ -126,6 +143,13 @@ class AppRouter {
           GoRoute(
             path: '/home/profile',
             builder: (context, state) => const ProfileScreen(),
+            routes: [
+              GoRoute(
+                path: 'edit',
+                parentNavigatorKey: _rootNavigatorKey,
+                builder: (context, state) => const ProfileEditScreen(),
+              ),
+            ],
           ),
         ],
       ),

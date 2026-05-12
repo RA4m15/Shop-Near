@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
 import 'core/routes/app_router.dart';
 
-class BazarLiveApp extends StatelessWidget {
-  const BazarLiveApp({super.key});
+class ShopNearApp extends StatelessWidget {
+  const ShopNearApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'BazarLive',
+      title: 'ShopNear',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
