@@ -142,7 +142,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
             child: Column(
               children: [
                 const SizedBox(height: 6),
-                Text(user.name, style: AppTextStyles.h2.copyWith(fontSize: 21, fontWeight: FontWeight.w900)),
+                Text(user.name, style: AppTextStyles.h2.copyWith(fontSize: 21, fontWeight: FontWeight.w900, color: Theme.of(context).colorScheme.onSurface)),
                 const SizedBox(height: 3),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
@@ -153,7 +153,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                 ),
                 const SizedBox(height: 10),
                 Text(user.bio ?? 'Local shopping enthusiast 🛍️ Supporting local sellers!', textAlign: TextAlign.center,
-                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.text, fontSize: 13, height: 1.5)),
+                    style: AppTextStyles.bodyMedium.copyWith(color: Theme.of(context).colorScheme.onSurface, fontSize: 13, height: 1.5)),
                 const SizedBox(height: 16),
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
@@ -193,8 +193,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () => context.go('/seller'),
-                        icon: Icon(Icons.storefront, size: 16, color: AppColors.text),
-                        label: Text('Seller Mode', style: AppTextStyles.labelMedium.copyWith(fontSize: 13, fontWeight: FontWeight.w800)),
+                        icon: Icon(Icons.storefront, size: 16, color: Theme.of(context).colorScheme.onSurface),
+                        label: Text('Seller Mode', style: AppTextStyles.labelMedium.copyWith(color: Theme.of(context).colorScheme.onSurface, fontSize: 13, fontWeight: FontWeight.w800)),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           side: const BorderSide(color: AppColors.border, width: 1.5),
@@ -283,7 +283,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   Widget _buildTabContent() {
     switch (_activeTabIndex) {
       case 0:
-        return GridView.count(key: const ValueKey(0), crossAxisCount: 3, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), padding: const EdgeInsets.symmetric(horizontal: 16), mainAxisSpacing: 10, crossAxisSpacing: 10, children: [
+        return GridView.count(key: const ValueKey(0), crossAxisCount: 3, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), padding: const EdgeInsets.symmetric(horizontal: 16), mainAxisSpacing: 12, crossAxisSpacing: 12, children: [
           _buildGridItem(context, '👗', const [Color(0xFFFFECD2), Color(0xFFFCB69F)]),
           _buildGridItem(context, '🌿', const [Color(0xFFA8EDEA), Color(0xFFFED6E3)]),
           _buildGridItem(context, '🎨', const [Color(0xFFD4FC79), Color(0xFF96E6A1)]),
@@ -303,7 +303,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           _buildReviewItem('Green Bazaar', 'Fresh organic honey. Delivery was quick and packaging was eco-friendly.', 4),
         ]);
       case 3:
-        return GridView.count(key: const ValueKey(3), crossAxisCount: 4, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), padding: const EdgeInsets.symmetric(horizontal: 16), mainAxisSpacing: 12, crossAxisSpacing: 12, children: [
+        return GridView.count(key: const ValueKey(3), crossAxisCount: 4, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), padding: const EdgeInsets.symmetric(horizontal: 16), mainAxisSpacing: 10, crossAxisSpacing: 10, children: [
           _buildBadgeItem('🌟', 'Top Buyer'), _buildBadgeItem('🔥', 'Early Adopter'), _buildBadgeItem('🤝', 'Local Supporter'), _buildBadgeItem('💎', 'Premium'),
         ]);
       default:
@@ -321,7 +321,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         child: Row(children: [
           Container(width: 44, height: 44, decoration: BoxDecoration(gradient: LinearGradient(colors: [AppColors.secondary.withOpacity(0.1), AppColors.secondary.withOpacity(0.05)]), borderRadius: BorderRadius.circular(12)), alignment: Alignment.center, child: const Text('🛍️', style: TextStyle(fontSize: 20))),
           const SizedBox(width: 12),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(name, style: AppTextStyles.labelMedium.copyWith(fontWeight: FontWeight.w800)), Text(id, style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted))])),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(name, style: AppTextStyles.labelMedium.copyWith(fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.onSurface)), Text(id, style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted))])),
           Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
             child: Text(status, style: AppTextStyles.labelSmall.copyWith(color: color, fontWeight: FontWeight.w900))),
         ]),
@@ -336,11 +336,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 6, offset: const Offset(0, 2))]),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text(shop, style: AppTextStyles.labelMedium.copyWith(fontWeight: FontWeight.w800)),
+          Text(shop, style: AppTextStyles.labelMedium.copyWith(fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.onSurface)),
           Row(children: List.generate(stars, (i) => const Icon(Icons.star, color: AppColors.accent, size: 14))),
         ]),
         const SizedBox(height: 6),
-        Text(review, style: AppTextStyles.bodySmall.copyWith(height: 1.5)),
+        Text(review, style: AppTextStyles.bodySmall.copyWith(height: 1.5, color: Theme.of(context).colorScheme.onSurface)),
       ]),
     );
   }
@@ -349,9 +349,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     return Column(children: [
       Container(width: 52, height: 52, decoration: BoxDecoration(color: AppColors.card, shape: BoxShape.circle, border: Border.all(color: AppColors.border),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 3))]),
-      alignment: Alignment.center, child: Text(emoji, style: const TextStyle(fontSize: 26))),
+        alignment: Alignment.center, child: Text(emoji, style: const TextStyle(fontSize: 26))),
       const SizedBox(height: 5),
-      Text(label, style: AppTextStyles.labelSmall.copyWith(fontSize: 9, fontWeight: FontWeight.w800), textAlign: TextAlign.center),
+      Text(label, style: AppTextStyles.labelSmall.copyWith(fontSize: 9, fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.onSurface), textAlign: TextAlign.center),
     ]);
   }
 
@@ -359,7 +359,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     return GestureDetector(
       onTap: tabIndex != null ? () => setState(() => _activeTabIndex = tabIndex) : null,
       child: Column(children: [
-        Text(val, style: AppTextStyles.h3.copyWith(fontSize: 19, fontWeight: FontWeight.w900)),
+        Text(val, style: AppTextStyles.h3.copyWith(fontSize: 19, fontWeight: FontWeight.w900, color: Theme.of(context).colorScheme.onSurface)),
         const SizedBox(height: 2),
         Text(lbl, style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted, fontSize: 11)),
       ]),
@@ -378,7 +378,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           alignment: Alignment.center, child: Icon(icon, color: iconColor, size: 22)),
         const SizedBox(width: 10),
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(title, style: AppTextStyles.labelMedium.copyWith(fontSize: 13, fontWeight: FontWeight.w800)),
+          Text(title, style: AppTextStyles.labelMedium.copyWith(fontSize: 13, fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.onSurface)),
           Text(sub, style: AppTextStyles.bodySmall.copyWith(color: AppColors.muted, fontSize: 11)),
         ]),
       ]),
